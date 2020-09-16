@@ -2,6 +2,8 @@
 #include "../lib/inc/utilites.h"
 #include "../lib/state_machine/state_machine.h"
 #include "../lib/io/button.h"
+#include <Wire.h>
+
 
 using namespace vibration_dispenser;
 
