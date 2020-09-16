@@ -1,11 +1,15 @@
-// pinout definition
-
-
 
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
-#define KEYPAD_PIN A0
+// Pinout definition
+#define KEYPAD_PIN      A0
+#define DOOR_BUTTON     5
+#define SERVO_PIN       8
+
+// Modes for operation
+
+// #define PINOUT_ENABLE
 
 #endif
 

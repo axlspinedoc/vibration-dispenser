@@ -6,8 +6,8 @@
 //------------------------------------------------------------------------------
 
 // IFNDEF ----------------------------------------------------------------------
-#ifndef TEMPLATE_H_
-#define TEMPLATE_H_
+#ifndef BUTTON_H_
+#define BUTTON_H_
 
 // DEFINES ---------------------------------------------------------------------
 
@@ -42,11 +42,10 @@ public:
 
   // FUNCTIONS -----------------------------------------------------------------
   /**
-   * Brief of the function 
-   * @param value[in]: Input value
-   * @return whatever it returns. 
+   * get button state   
+   * @return true when 1, false when 0
    * */
-  void publicFunction(const long &value = 0);
+  bool getState();
   
   // MEMBER GETTERS ------------------------------------------------------------
   int getTemplateValue() const;
@@ -59,8 +58,7 @@ private:
   void privateFunction();
 
   // MEMBERS -------------------------------------------------------------------
-  int templateValue_ = 0;
-  const int templateConstValue = 10;
+  bool state=false;
 }; // End of class Template
 
 // END OF NAMESPACES 

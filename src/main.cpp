@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include "../lib/inc/utilites.h"
 #include "../lib/state_machine/state_machine.h"
+#include "../lib/io/button.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
+io::Button door_button;
 
 char incomingChar;
 int weight=0;
@@ -14,8 +16,14 @@ void setup() {
   
   Serial.begin(115200);
   Serial.println("System initialized");
-    
 
+  #ifdef PINOUT_ENABLE
+  pinMode(DOOR_BUTTON, INPUT);
+  pinMode(KEYPAD_PIN, INPUT);
+  Servo door_servo;
+  door_servo.attach(SERVO_PIN);
+  #endif
+  
 }
 
 void loop() {

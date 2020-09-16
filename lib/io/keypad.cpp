@@ -26,21 +26,5 @@ Button::~Button(){
 
 }
 
-void Button::publicFunction(const long &value) {
-  // do something
-}
-  
-int Button::getTemplateValue() const {
-  return templateValue_;
-}
-
-void Button::setTemplateValue(const int &templateValue) {
-  templateValue_ = templateValue;
-}
-  
-void Button::privateFunction() {
-  // do something
-}
-
 // END OF NAMESPACES -----------------------------------------------------------
 }}
