@@ -1,29 +1,20 @@
 #include <Arduino.h>
 #include "../lib/inc/utilites.h"
+#include "../lib/state_machine/state_machine.h"
 
 using namespace vibration_dispenser;
 
-enum class State{
-  STANDBY=0,
-  SETGRAMS=1,
-  DISPENSING=2,
-  SERVED=3,
-  FLUSH=4
-};
+control::State_machine machine_state;
 
 char incomingChar;
 int weight=0;
 bool weight_changed=false;
 
-State state;
-
 void setup() {
   
   Serial.begin(115200);
   Serial.println("System initialized");
-  
-  state=State::STANDBY;
-  Serial.println("State:= STANDBY");
+    
 
 }
 
@@ -51,22 +42,22 @@ void loop() {
     
   }
   
-    switch (state)
+    switch (machine_state.getState())
     {
-    case State::STANDBY:
+    case control::State::STANDBY:
       if (incomingChar=='W')
       {
         /* code */
-        state=State::SETGRAMS;
+        machine_state.setState(control::State::SETGRAMS);
         Serial.println("State:= SETGRAMS");
       } else if(incomingChar=='D'){
 
-      state=State::DISPENSING;
+      machine_state.setState(control::State::DISPENSING);
       Serial.println("State:= DISPENSING");
       }     
       break;
     
-    case State::SETGRAMS:
+    case control::State::SETGRAMS:
       
       if (weight_changed)
       {
@@ -78,34 +69,34 @@ void loop() {
       if (incomingChar=='Q')
       {
         /* code */
-        state=State::STANDBY;
+        machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
       }
       break;
 
-    case State::DISPENSING:
+    case control::State::DISPENSING:
       if (incomingChar=='S')
       {
         /* code */
-        state=State::SERVED;
+        machine_state.setState(control::State::SERVED);
         Serial.println("State:= SERVED");
       }
       break;  
 
-    case State::SERVED:
+    case control::State::SERVED:
       if (incomingChar=='F')
       {
         /* code */
-        state=State::FLUSH;
+        machine_state.setState(control::State::FLUSH);
         Serial.println("State:= FLUSH");      
       }
       break;
 
-    case State::FLUSH:
+    case control::State::FLUSH:
       if (incomingChar=='R')
       {
         /* code */
-        state=State::STANDBY;
+        machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
       }
       
@@ -118,9 +109,6 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
-void resolveSerial(){
-  
-}
 
 
 

@@ -32,7 +32,7 @@ int State_machine::setGrams(int grams) {
 }
 
 int State_machine::setState(State next_state){
-  
+  state_=next_state;
   return 0;
 }
 

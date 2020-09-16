@@ -25,7 +25,7 @@ enum class State{
   STANDBY=0,
   SETGRAMS=1,
   DISPENSING=2,
-  DISPENSED=3,
+  SERVED=3,
   FLUSH=4,
   ERROR=5
 };
@@ -72,8 +72,7 @@ public:
   
   
 private:
-  // FUNCTIONS -----------------------------------------------------------------
-  void privateFunction();
+  // FUNCTIONS -----------------------------------------------------------------  
 
   // MEMBERS -------------------------------------------------------------------
   int grams_programmed_ = 0;
