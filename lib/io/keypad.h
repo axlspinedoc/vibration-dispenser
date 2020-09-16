@@ -16,29 +16,36 @@
 // FOWARD DECLARATIONS ---------------------------------------------------------
 
 // NAMESPACES ------------------------------------------------------------------
-namespace machine { namespace template_ {  
+namespace vibration_dispenser { namespace io {  
 
 // FOWARD DECLARATIONS ---------------------------------------------------------
 
 // ENUMS -----------------------------------------------------------------------
+enum class Key{
+  UP=0,
+  DOWN,
+  LEFT,
+  RIGHT,
+  ENTER
+};
 
 // STRUCTS ---------------------------------------------------------------------
 
 // TYPEDEFS --------------------------------------------------------------------
 
 // CLASS DECLARATION -----------------------------------------------------------
-class Template {
+class Button {
 public:
 
   // CONSTRUCTOR AND DESTRUCTOR ------------------------------------------------
   /**
    * Constructor
    * */
-  Template();
+  Button();
   /**
    * Destructor
    * */
-  ~Template();
+  ~Button();
 
   // FUNCTIONS -----------------------------------------------------------------
   /**

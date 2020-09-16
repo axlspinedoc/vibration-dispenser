@@ -6,11 +6,11 @@
 //------------------------------------------------------------------------------
 
 // INCLUDES --------------------------------------------------------------------
-#include "template.h"
+#include "button.h"
 // FOWARD DECLARATIONS ---------------------------------------------------------
 
 // NAMESPACES ------------------------------------------------------------------
-namespace machine { namespace template_ {  
+namespace vibration_dispenser { namespace io {  
 
 // ENUMS -----------------------------------------------------------------------
 
@@ -18,27 +18,27 @@ namespace machine { namespace template_ {
 
 // CLASS IMPLEMENTATION --------------------------------------------------------
 
-Template::Template() {
+Button::Button(){
   
 }
   
-Template::~Template() {
+Button::~Button(){
 
 }
 
-void Template::publicFunction(const long &value) {
+void Button::publicFunction(const long &value) {
   // do something
 }
   
-int Template::getTemplateValue() const {
+int Button::getTemplateValue() const {
   return templateValue_;
 }
 
-void Template::setTemplateValue(const int &templateValue) {
+void Button::setTemplateValue(const int &templateValue) {
   templateValue_ = templateValue;
 }
   
-void Template::privateFunction() {
+void Button::privateFunction() {
   // do something
 }
 

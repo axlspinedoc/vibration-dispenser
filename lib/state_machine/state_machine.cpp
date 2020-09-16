@@ -6,11 +6,11 @@
 //------------------------------------------------------------------------------
 
 // INCLUDES --------------------------------------------------------------------
-#include "template.h"
+#include "state_machine.h"
 // FOWARD DECLARATIONS ---------------------------------------------------------
 
 // NAMESPACES ------------------------------------------------------------------
-namespace machine { namespace template_ {  
+namespace vibration_dispenser { namespace control {  
 
 // ENUMS -----------------------------------------------------------------------
 
@@ -18,29 +18,27 @@ namespace machine { namespace template_ {
 
 // CLASS IMPLEMENTATION --------------------------------------------------------
 
-Template::Template() {
-  
+State_machine::State_machine() {
+  state_=State::STANDBY;
 }
   
-Template::~Template() {
+State_machine::~State_machine() {
 
 }
 
-void Template::publicFunction(const long &value) {
-  // do something
-}
-  
-int Template::getTemplateValue() const {
-  return templateValue_;
+int State_machine::setGrams(int grams) {
+  grams_programmed_=grams;
+  return 0;
 }
 
-void Template::setTemplateValue(const int &templateValue) {
-  templateValue_ = templateValue;
-}
+int State_machine::setState(State next_state){
   
-void Template::privateFunction() {
-  // do something
+  return 0;
 }
 
+State State_machine::getState(){
+  return state_;
+}
+  
 // END OF NAMESPACES -----------------------------------------------------------
 }}
