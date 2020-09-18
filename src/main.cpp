@@ -1,3 +1,14 @@
+//------------------------------------------------------------------------------
+// @file: main.cpp
+// @author: Axel Sandoval
+// @e-mail: axel_isc@hotmail.com
+// @created on: September 15, 2020
+// 
+//
+// @brief: Source code for a vibration dispenser machine with scalability.
+// LICENCE
+//------------------------------------------------------------------------------
+
 #include <Arduino.h>
 #include <Servo.h>
 #include "../lib/inc/utilites.h"
@@ -5,13 +16,16 @@
 #include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../lib/io/button.h"
 #include "../lib/io/keypad.h"
+#include "../lib/io/screencom.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
-io::Button door_button(DOOR_BUTTON);
-io::Button disp_button(DISPENSE_BUTTON);
-io::Keypad keypad(KEYPAD_PIN);
+// io::Button door_button(DOOR_BUTTON);
+// io::Button disp_button(DISPENSE_BUTTON);
+// io::Keypad keypad(KEYPAD_PIN);
+// io::Screencom screen();
+
 
 Servo door_servo;
 
@@ -172,7 +186,7 @@ void loop() {
 //---------------------------------FUNCTIONS------------------------------------
 
 void tick(){
-  door_button.tick();
-  disp_button.tick();
+  // door_button.tick();
+  // disp_button.tick();
 }
 
