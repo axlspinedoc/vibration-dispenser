@@ -34,18 +34,18 @@ enum class Key{
 // TYPEDEFS --------------------------------------------------------------------
 
 // CLASS DECLARATION -----------------------------------------------------------
-class Button {
+class Keypad {
 public:
 
   // CONSTRUCTOR AND DESTRUCTOR ------------------------------------------------
   /**
    * Constructor
    * */
-  Button();
+  Keypad();
   /**
    * Destructor
    * */
-  ~Button();
+  ~Keypad();
 
   // FUNCTIONS -----------------------------------------------------------------
   /**

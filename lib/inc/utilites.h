@@ -6,6 +6,7 @@
 #define KEYPAD_PIN      A0
 #define DOOR_BUTTON     5
 #define SERVO_PIN       8
+#define LCD_ADDRESS     0x3F
 
 // Modes for operation
 

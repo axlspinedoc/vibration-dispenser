@@ -1,7 +1,11 @@
 //------------------------------------------------------------------------------
-// @file: template.h
-// @created on: April 23, 2020
+// @file: button.h
+// @author: Axel Sandoval
+// @e-mail: axel_isc@hotmail.com
+// @created on: September 17, 2020
 // 
+//
+// @brief: Button library with debounce functionality. 
 // LICENCE
 //------------------------------------------------------------------------------
 
@@ -9,22 +13,11 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-// DEFINES ---------------------------------------------------------------------
-
 // INCLUDES --------------------------------------------------------------------
-
-// FOWARD DECLARATIONS ---------------------------------------------------------
+#include <Arduino.h>
 
 // NAMESPACES ------------------------------------------------------------------
 namespace vibration_dispenser { namespace io {  
-
-// FOWARD DECLARATIONS ---------------------------------------------------------
-
-// ENUMS -----------------------------------------------------------------------
-
-// STRUCTS ---------------------------------------------------------------------
-
-// TYPEDEFS --------------------------------------------------------------------
 
 // CLASS DECLARATION -----------------------------------------------------------
 class Button {
@@ -33,8 +26,9 @@ public:
   // CONSTRUCTOR AND DESTRUCTOR ------------------------------------------------
   /**
    * Constructor
+   * Assigns custom debounce delay time, ifnot, defaults to 50ms
    * */
-  Button();
+  Button(int button_pin_, unsigned long debounceDelay=50);
   /**
    * Destructor
    * */
@@ -42,23 +36,24 @@ public:
 
   // FUNCTIONS -----------------------------------------------------------------
   /**
-   * get button state   
-   * @return true when 1, false when 0
+   * get button state AFTER debounce time  
+   * @return true when condition is met after debounce time, false if else
    * */
-  bool getState();
+  int getState();
   
-  // MEMBER GETTERS ------------------------------------------------------------
-  int getTemplateValue() const;
-
-  // MEMBER SETTERS ------------------------------------------------------------
-  void setTemplateValue(const int &templateValue);
-  
-private:
-  // FUNCTIONS -----------------------------------------------------------------
-  void privateFunction();
+private:  
 
   // MEMBERS -------------------------------------------------------------------
-  bool state=false;
+  
+  // saves pin where button is attached
+  int button_pin_;
+  // 
+  int current_state_=LOW;
+  int last_state_=LOW;
+  // the last time the output pin was toggled
+  unsigned long lastDebounceTime_;  
+  // the debounce time in millis; increase if the output flickers  
+  unsigned long debounceDelay_;
 }; // End of class Template
 
 // END OF NAMESPACES 
