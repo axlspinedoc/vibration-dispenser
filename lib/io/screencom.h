@@ -16,6 +16,8 @@
 // DEFINES ---------------------------------------------------------------------
 
 // INCLUDES --------------------------------------------------------------------
+#include "../Keypad_shield/LiquidCrystal.h"
+#include "../inc/utilites.h"
 
 // FOWARD DECLARATIONS ---------------------------------------------------------
 
@@ -74,6 +76,7 @@ private:
 
   // MEMBERS -------------------------------------------------------------------
   Screen screen_;  
+  
 }; // End of class Template
 
 // END OF NAMESPACES 
