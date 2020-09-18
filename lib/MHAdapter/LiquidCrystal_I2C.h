@@ -1,3 +1,10 @@
+//------------------------------------------------------------------------------
+// @file: LiquidCrystal_I2C.h
+// @brief: Library for controlling an LCD using a PCF8574 IIC adapter
+// 
+// LICENCE
+//------------------------------------------------------------------------------
+
 #ifndef FDB_LIQUID_CRYSTAL_I2C_H
 #define FDB_LIQUID_CRYSTAL_I2C_H
 

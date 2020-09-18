@@ -1,7 +1,5 @@
 #include <Arduino.h>
-//#include "../lib/io/button.h"
 #include <Servo.h>
-#include <Wire.h>
 #include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../lib/inc/utilites.h"
 #include "../lib/state_machine/state_machine.h"
@@ -10,9 +8,13 @@ using namespace vibration_dispenser;
 
 control::State_machine machine_state;
 
+// Serial comm
 char incomingChar;
 int weight=0;
 bool weight_changed=false;
+
+// Screencom
+bool published=false;
 
 Servo door_servo;
 LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
@@ -21,8 +23,8 @@ void setup() {
   
   Serial.begin(115200);
   Serial.println("System initialized");
-  door_servo.attach(3);
-  door_servo.write(0);
+  door_servo.attach(SERVO_PIN);
+  door_servo.write(DOOR_CLOSED);
   
   lcd.begin();
   lcd.clear();  
@@ -32,15 +34,18 @@ void setup() {
   lcd.print("V0.1");
   delay(2000);
 
-  #ifdef PINOUT_ENABLE  
-  Servo door_servo;
-  door_servo.attach(SERVO_PIN);
-  #endif
-
-  //lcd.print("System initialized");
+  lcd.clear();
+  lcd.print("Presione D para");
+  lcd.setCursor(0,1);
+  lcd.print("dispensar");
+  lcd.setCursor(0,2);      
+  lcd.print("Presione W para");
+  lcd.setCursor(0,3);
+  lcd.print("cambiar gramaje");
 }
 
 void loop() {
+  
   if (Serial.available()>0)
   {
     if (Serial.available()==1)
@@ -67,21 +72,23 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
-      lcd.clear();
-      lcd.print("Presione D para dispensar");
-      lcd.setCursor(0,3);      
-      lcd.print("Presione W para cambiar gramaje");
+      
 
       if (incomingChar=='W')
       {
-        /* code */
         machine_state.setState(control::State::SETGRAMS);
         Serial.println("State:= SETGRAMS");
         
       } else if(incomingChar=='D'){
 
         machine_state.setState(control::State::DISPENSING);
-        Serial.println("State:= DISPENSING");              
+        Serial.println("State:= DISPENSING");
+        lcd.clear();
+        lcd.print("Dispensando...");      
+        lcd.setCursor(0,2);      
+        lcd.print("Presione S para");
+        lcd.setCursor(0,3);
+        lcd.print("detener dispensado");                    
       }     
       break;
     
@@ -95,50 +102,55 @@ void loop() {
       }    
       
       if (incomingChar=='Q')
-      {
-        /* code */
+      {        
         machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
       }
       break;
 
     case control::State::DISPENSING:
-      lcd.clear();
-      lcd.print("Dispensando");      
-      lcd.setCursor(0,3);      
-      lcd.print("Presione S para terminar de dispensar");
+      
       
       if (incomingChar=='S')
-      {
-        /* code */
+      {        
         machine_state.setState(control::State::SERVED);
         Serial.println("State:= SERVED");
+        lcd.clear();
+        lcd.print("Presione F para");   
+        lcd.setCursor(0,1);
+        lcd.print("vaciar tolva");
       }
       break;  
 
     case control::State::SERVED:
-      lcd.clear();
-      lcd.print("Presione F para vaciar tolva");      
-      
+               
       if (incomingChar=='F')
-      {
-        /* code */
+      {        
         machine_state.setState(control::State::FLUSH);
         Serial.println("State:= FLUSH");
-        door_servo.write(90);      
+        door_servo.write(DOOR_OPEN);      
+        lcd.clear();
+        lcd.print("Presione R para"); 
+        lcd.setCursor(0,1);
+        lcd.print("terminar vaciado"); 
       }
       break;
 
-    case control::State::FLUSH:
-      lcd.clear();
-      lcd.print("Presione R para terminar vaciado");  
+    case control::State::FLUSH:      
       
       if (incomingChar=='R')
-      {
-        /* code */
+      {        
         machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
-        door_servo.write(0);
+        door_servo.write(DOOR_CLOSED);
+        lcd.clear();
+        lcd.print("Presione D para");
+        lcd.setCursor(0,1);
+        lcd.print("dispensar");
+        lcd.setCursor(0,2);      
+        lcd.print("Presione W para");
+        lcd.setCursor(0,3);
+        lcd.print("cambiar gramaje");
       }
       
       break;
@@ -150,7 +162,25 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
-
+void writeToScreen(String message){
+  if (published)
+  {      
+    published=true;
+    lcd.clear();
+    
+    if (message.length()>LCD_COL)
+    {
+      String String1=message.substring(0,LCD_COL);
+      String String2=message.substring(LCD_COL+1,message.length());
+      lcd.print(String1);
+      lcd.setCursor(0,1);
+      lcd.print(String2);
+    }else{
+      
+    }
+  
+  }
+}
 
 
   
