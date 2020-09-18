@@ -12,26 +12,22 @@
 // DEFINES ---------------------------------------------------------------------
 
 // INCLUDES --------------------------------------------------------------------
+#include "../inc/utilites.h"
+#include <Arduino.h>
 
 // FOWARD DECLARATIONS ---------------------------------------------------------
+
+// ENUM ------------------------------------------------------------------------
+enum class Key{
+  RIGHT=0,
+  UP,
+  DOWN,
+  LEFT,
+  SELECT
+};
 
 // NAMESPACES ------------------------------------------------------------------
 namespace vibration_dispenser { namespace io {  
-
-// FOWARD DECLARATIONS ---------------------------------------------------------
-
-// ENUMS -----------------------------------------------------------------------
-enum class Key{
-  UP=0,
-  DOWN,
-  LEFT,
-  RIGHT,
-  ENTER
-};
-
-// STRUCTS ---------------------------------------------------------------------
-
-// TYPEDEFS --------------------------------------------------------------------
 
 // CLASS DECLARATION -----------------------------------------------------------
 class Keypad {
@@ -41,7 +37,7 @@ public:
   /**
    * Constructor
    * */
-  Keypad();
+  Keypad(int pinout);
   /**
    * Destructor
    * */
@@ -53,21 +49,22 @@ public:
    * @param value[in]: Input value
    * @return whatever it returns. 
    * */
-  void publicFunction(const long &value = 0);
-  
-  // MEMBER GETTERS ------------------------------------------------------------
-  int getTemplateValue() const;
+  void publicFunction(const long &value = 0);  
 
-  // MEMBER SETTERS ------------------------------------------------------------
-  void setTemplateValue(const int &templateValue);
+  /**
+   * Brief of the function 
+   * @param value[in]: Input value
+   * @return whatever it returns. 
+   * */
+  Key getKey();
   
 private:
-  // FUNCTIONS -----------------------------------------------------------------
-  void privateFunction();
 
-  // MEMBERS -------------------------------------------------------------------
-  int templateValue_ = 0;
-  const int templateConstValue = 10;
+  // MEMBERS -------------------------------------------------------------------  
+  
+  // saves pin where keypad is attached
+  int keypad_pin_;
+  
 }; // End of class Template
 
 // END OF NAMESPACES 

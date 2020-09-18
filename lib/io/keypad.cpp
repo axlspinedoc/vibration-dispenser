@@ -12,19 +12,38 @@
 // NAMESPACES ------------------------------------------------------------------
 namespace vibration_dispenser { namespace io {  
 
-// ENUMS -----------------------------------------------------------------------
-
-// STRUCTS ---------------------------------------------------------------------
-
 // CLASS IMPLEMENTATION --------------------------------------------------------
 
-Keypad::Keypad(){
+  Keypad::Keypad(int pinout){
+  keypad_pin_=pinout;    
+  }
   
-}
+  Keypad::~Keypad(){
   
-Keypad::~Keypad(){
-
-}
-
+  }
+  
+  Key Keypad::getKey(){
+    
+    int reading=analogRead(keypad_pin_);
+    
+    if (reading<RIGHT_VALUE)
+    {
+        return Key::RIGHT;    
+    } 
+    else if(reading<UP_VALUE){
+        return Key::UP;
+    }
+    else if(reading<DOWN_VALUE){
+        return Key::DOWN;
+    }
+    else if(reading<LEFT_VALUE){
+        return Key::LEFT;
+    }
+    else {
+        return Key::SELECT;
+    }
+        
+  }
+  
 // END OF NAMESPACES -----------------------------------------------------------
 }}

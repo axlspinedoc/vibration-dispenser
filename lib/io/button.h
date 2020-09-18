@@ -26,7 +26,7 @@ public:
   // CONSTRUCTOR AND DESTRUCTOR ------------------------------------------------
   /**
    * Constructor
-   * Assigns custom debounce delay time, ifnot, defaults to 50ms
+   * Assigns attach pin and custom debounce delay time; ifnot defaults to 50ms
    * */
   Button(int button_pin_, unsigned long debounceDelay=50);
   /**
@@ -43,10 +43,16 @@ public:
 
   // FUNCTIONS -----------------------------------------------------------------
   /**
-   * get button state AFTER debounce time  
-   * @return true when condition is met after debounce time, false if else
+   * Constantly checks for a state change in the pin. After completing debounce
+   * time, output state changes to true. Output state must be reset after read.   
    * */
-  int tick();
+  void tick();
+
+  // FUNCTIONS -----------------------------------------------------------------
+  /**
+   * Resets output state to 0   
+   * */
+  void reset();
   
 private:  
 
@@ -54,11 +60,14 @@ private:
   
   // saves pin where button is attached
   int button_pin_;
-  // 
-  int current_state_=LOW;
-  int last_state_=LOW;
-  // the last time the output pin was toggled
-  unsigned long lastDebounceTime_;  
+  // The binary output of the button 
+  int output_state_=HIGH;
+  // The actual state of the pin
+  int button_state_=HIGH;
+  // The previous state of the pin
+  int last_button_state_=LOW;
+  // the last time a change in pin state was recorded
+  unsigned long lastDebounceTime_=0;  
   // the debounce time in millis; increase if the output flickers  
   unsigned long debounceDelay_;
 }; // End of class Template

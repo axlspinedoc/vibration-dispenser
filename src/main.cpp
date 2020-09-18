@@ -1,23 +1,27 @@
 #include <Arduino.h>
 #include <Servo.h>
-#include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../lib/inc/utilites.h"
 #include "../lib/state_machine/state_machine.h"
+#include "../lib/MHAdapter/LiquidCrystal_I2C.h"
+#include "../lib/io/button.h"
+#include "../lib/io/keypad.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
+io::Button door_button(DOOR_BUTTON);
+io::Button disp_button(DISPENSE_BUTTON);
+io::Keypad keypad(KEYPAD_PIN);
 
-// Serial comm
+Servo door_servo;
+
+// Screencom
+LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
+
+// Serial comm DEBUGGING
 char incomingChar;
 int weight=0;
 bool weight_changed=false;
-
-// Screencom
-bool published=false;
-
-Servo door_servo;
-LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
 
 void setup() {
   
@@ -43,6 +47,11 @@ void setup() {
   lcd.setCursor(0,3);
   lcd.print("cambiar gramaje");
 }
+
+// Forward declarations
+
+// Checks status of functions inside on each loop
+void tick();
 
 void loop() {
   
@@ -162,27 +171,8 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
-void writeToScreen(String message){
-  if (published)
-  {      
-    published=true;
-    lcd.clear();
-    
-    if (message.length()>LCD_COL)
-    {
-      String String1=message.substring(0,LCD_COL);
-      String String2=message.substring(LCD_COL+1,message.length());
-      lcd.print(String1);
-      lcd.setCursor(0,1);
-      lcd.print(String2);
-    }else{
-      
-    }
-  
-  }
+void tick(){
+  door_button.tick();
+  disp_button.tick();
 }
-
-
-  
-
 

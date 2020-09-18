@@ -5,18 +5,26 @@
 // Pinout definition
 #define KEYPAD_PIN      A0
 #define DOOR_BUTTON     5
+#define DISPENSE_BUTTON 6
 #define SERVO_PIN       3
 #define LCD_ADDRESS     0x3F
+const int pin_RS = 8; 
+const int pin_EN = 9; 
+const int pin_d4 = 4; 
+const int pin_d5 = 5; 
+const int pin_d6 = 6; 
+const int pin_d7 = 7; 
+const int pin_BL = 10; 
 
 // Definition of custom values
 #define DOOR_CLOSED     0
 #define DOOR_OPEN       45
 
-#define RIGHT           60
-#define UP              200
-#define DOWN            400
-#define LEFT            600
-#define SELECT          800
+#define RIGHT_VALUE     60
+#define UP_VALUE        200
+#define DOWN_VALUE      400
+#define LEFT_VALUE      600
+#define SELECT_VALUE    800
 
 #define LCD_COL         20
 #define LCD_ROW         4
