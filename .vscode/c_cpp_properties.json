@@ -14,9 +14,9 @@
                 "/home/axl/Documents/personal/vibration-dispenser/lib/MHAdapter",
                 "/home/axl/Documents/personal/vibration-dispenser/lib/inc",
                 "/home/axl/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                "/home/axl/Documents/personal/vibration-dispenser/.pio/libdeps/uno/Servo/src",
+                "/home/axl/Documents/personal/vibration-dispenser/.pio/libdeps/megaatmega2560/Servo/src",
                 "/home/axl/.platformio/packages/framework-arduino-avr/cores/arduino",
-                "/home/axl/.platformio/packages/framework-arduino-avr/variants/standard",
+                "/home/axl/.platformio/packages/framework-arduino-avr/variants/mega",
                 "/home/axl/Documents/personal/vibration-dispenser/lib/scale",
                 "/home/axl/Documents/personal/vibration-dispenser/lib/template",
                 "/home/axl/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
@@ -37,9 +37,9 @@
                     "/home/axl/Documents/personal/vibration-dispenser/lib/MHAdapter",
                     "/home/axl/Documents/personal/vibration-dispenser/lib/inc",
                     "/home/axl/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                    "/home/axl/Documents/personal/vibration-dispenser/.pio/libdeps/uno/Servo/src",
+                    "/home/axl/Documents/personal/vibration-dispenser/.pio/libdeps/megaatmega2560/Servo/src",
                     "/home/axl/.platformio/packages/framework-arduino-avr/cores/arduino",
-                    "/home/axl/.platformio/packages/framework-arduino-avr/variants/standard",
+                    "/home/axl/.platformio/packages/framework-arduino-avr/variants/mega",
                     "/home/axl/Documents/personal/vibration-dispenser/lib/scale",
                     "/home/axl/Documents/personal/vibration-dispenser/lib/template",
                     "/home/axl/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
@@ -52,11 +52,11 @@
             },
             "defines": [
                 "PLATFORMIO=50001",
-                "ARDUINO_AVR_UNO",
+                "ARDUINO_AVR_MEGA2560",
                 "F_CPU=16000000L",
                 "ARDUINO_ARCH_AVR",
                 "ARDUINO=10808",
-                "__AVR_ATmega328P__",
+                "__AVR_ATmega2560__",
                 ""
             ],
             "intelliSenseMode": "clang-x64",
@@ -64,7 +64,7 @@
             "cppStandard": "c++11",
             "compilerPath": "/home/axl/.platformio/packages/toolchain-atmelavr/bin/avr-gcc",
             "compilerArgs": [
-                "-mmcu=atmega328p",
+                "-mmcu=atmega2560",
                 ""
             ]
         }
