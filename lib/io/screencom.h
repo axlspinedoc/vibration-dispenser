@@ -75,7 +75,7 @@ private:
   void errorScreen();
 
   // MEMBERS -------------------------------------------------------------------
-  Screen screen_;  
+  
   
 }; // End of class Template
 

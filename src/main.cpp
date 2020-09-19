@@ -46,15 +46,17 @@ void setup() {
   
   lcd.begin(LCD_COL,LCD_ROW);
   lcd.clear();    
-  lcd.print("System initialized");
+  lcd.setCursor(0,0);  
+  lcd.print("Sistema iniciado");
   lcd.setCursor(0,1);
   lcd.print("V0.1");
   delay(2000);
 
   lcd.clear();
-  lcd.print("Presione D para");
+  lcd.setCursor(0,0);
+  lcd.print("Presione D");
   lcd.setCursor(0,1);
-  lcd.print("dispensar");
+  lcd.print("para dispensar");
   // lcd.setCursor(0,2);      
   // lcd.print("Presione W para");
   // lcd.setCursor(0,3);
@@ -105,12 +107,11 @@ void loop() {
 
         machine_state.setState(control::State::DISPENSING);
         Serial.println("State:= DISPENSING");
+        
         lcd.clear();
         lcd.print("Dispensando...");      
-        lcd.setCursor(0,2);      
-        lcd.print("Presione S para");
-        lcd.setCursor(0,3);
-        lcd.print("detener dispensado");                    
+        lcd.setCursor(0,1);      
+        lcd.print("S para detener");
       }     
       break;
     
@@ -166,13 +167,10 @@ void loop() {
         Serial.println("State:= STANDBY");
         door_servo.write(DOOR_CLOSED);
         lcd.clear();
-        lcd.print("Presione D para");
+        lcd.setCursor(0,0);
+        lcd.print("Presione D");
         lcd.setCursor(0,1);
-        lcd.print("dispensar");
-        lcd.setCursor(0,2);      
-        lcd.print("Presione W para");
-        lcd.setCursor(0,3);
-        lcd.print("cambiar gramaje");
+        lcd.print("para dispensar");
       }
       
       break;
