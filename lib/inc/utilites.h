@@ -7,7 +7,13 @@
 #define DOOR_BUTTON     5
 #define DISPENSE_BUTTON 6
 #define SERVO_PIN       3
+
+// LCD Size
+#define LCD_COL         16
+#define LCD_ROW         4
+// I2C LCD
 #define LCD_ADDRESS     0x3F
+// Common LCD
 const int pin_RS = 8; 
 const int pin_EN = 9; 
 const int pin_d4 = 4; 
@@ -25,9 +31,6 @@ const int pin_BL = 10;
 #define DOWN_VALUE      400
 #define LEFT_VALUE      600
 #define SELECT_VALUE    800
-
-#define LCD_COL         20
-#define LCD_ROW         4
 
 // Modes for operation
 // #define PINOUT_ENABLE

@@ -30,7 +30,7 @@ control::State_machine machine_state;
 Servo door_servo;
 
 // Screencom
-LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
+LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
 // Serial comm DEBUGGING
 char incomingChar;
@@ -44,11 +44,10 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
   
-  lcd.begin();
-  lcd.clear();  
-  lcd.setCursor(1,1);
+  lcd.begin(LCD_COL,LCD_ROW);
+  lcd.clear();    
   lcd.print("System initialized");
-  lcd.setCursor(1,3);
+  lcd.setCursor(0,1);
   lcd.print("V0.1");
   delay(2000);
 
@@ -56,10 +55,10 @@ void setup() {
   lcd.print("Presione D para");
   lcd.setCursor(0,1);
   lcd.print("dispensar");
-  lcd.setCursor(0,2);      
-  lcd.print("Presione W para");
-  lcd.setCursor(0,3);
-  lcd.print("cambiar gramaje");
+  // lcd.setCursor(0,2);      
+  // lcd.print("Presione W para");
+  // lcd.setCursor(0,3);
+  // lcd.print("cambiar gramaje");
 }
 
 // Forward declarations
