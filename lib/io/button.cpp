@@ -28,21 +28,49 @@ Button::~Button(){
 void Button::tick(){
   
     int reading=digitalRead(button_pin_);
-    if (reading!=last_button_state_)
-      lastDebounceTime_=millis();
-
+    if (reading!=last_button_state_){
+      lastDebounceTime_ = millis();
+    }
 
     if ((millis() - lastDebounceTime_) > debounceDelay_) {
       if (reading!=button_state_)
       {
-        button_state_=reading;
-        output_state_=true;
+        button_state_=reading;        
       }
-        
-    }
-    
+      if (button_state_==HIGH)
+      {
+        output_state_ = true;
+      }
+              
+    }    
     last_button_state_=reading;
 }
+
+// void loop()
+// {
+
+//   int reading = digitalRead(buttonPin);
+//   if (reading != lastButtonState)
+//   {
+//     // reset the debouncing timer
+//     lastDebounceTime = millis();
+//   }
+
+//   if ((millis() - lastDebounceTime) > debounceDelay)
+//   {
+//     // if the button state has changed:
+//     if (reading != buttonState)
+//     {
+//       buttonState = reading;
+
+//       if (buttonState == HIGH)
+//       {
+//         ledState = !ledState;
+//       }
+//     }
+//   }
+//   lastButtonState = reading;
+// }
 
 // Checks pin state and assures debounce time has passed. Ifnot, returns last
 // registered state
