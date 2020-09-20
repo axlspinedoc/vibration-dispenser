@@ -3,16 +3,16 @@
 #define UTILITIES_H_
 
 // Pinout definition
-#define KEYPAD_PIN      A0
-#define DOOR_BUTTON     5
-#define DISPENSE_BUTTON 6
-#define SERVO_PIN       3
+#define KEYPAD_PIN          A0
+#define DOOR_BUTTON_PIN     5
+#define DISPENSE_BUTTON_PIN 31
+#define SERVO_PIN           3
 
-// LCD Size
-#define LCD_COL         16
-#define LCD_ROW         4
-// I2C LCD
-#define LCD_ADDRESS     0x3F
+// LCD Size 
+#define LCD_COL             16
+#define LCD_ROW             4
+// I2C LCD  
+#define LCD_ADDRESS         0x3F
 // Common LCD
 const int pin_RS = 8; 
 const int pin_EN = 9; 

@@ -39,7 +39,7 @@ public:
    * get button state AFTER debounce time  
    * @return true when condition is met after debounce time, false if else
    * */
-  int getState();
+  bool getState();
 
   // FUNCTIONS -----------------------------------------------------------------
   /**
@@ -63,9 +63,9 @@ private:
   // The binary output of the button 
   int output_state_=HIGH;
   // The actual state of the pin
-  int button_state_=HIGH;
+  int button_state_;
   // The previous state of the pin
-  int last_button_state_=LOW;
+  int last_button_state_=HIGH;
   // the last time a change in pin state was recorded
   unsigned long lastDebounceTime_=0;  
   // the debounce time in millis; increase if the output flickers  

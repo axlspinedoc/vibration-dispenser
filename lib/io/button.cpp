@@ -46,7 +46,7 @@ void Button::tick(){
 
 // Checks pin state and assures debounce time has passed. Ifnot, returns last
 // registered state
-int Button::getState(){
+bool Button::getState(){
   return output_state_;
 }
 
