@@ -39,9 +39,14 @@ namespace vibration_dispenser { namespace io {
     else if(reading<LEFT_VALUE){
         return Key::LEFT;
     }
-    else {
+    else if (reading<SELECT_VALUE) {
         return Key::SELECT;
     }
+    else
+    {
+        return Key::NO_KEY;
+    }
+    
         
   }
   
