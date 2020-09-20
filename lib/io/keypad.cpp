@@ -14,8 +14,9 @@ namespace vibration_dispenser { namespace io {
 
 // CLASS IMPLEMENTATION --------------------------------------------------------
 
-  Keypad::Keypad(int pinout){
-  keypad_pin_=pinout;    
+  Keypad::Keypad(int pinout,unsigned long debounceDelay){
+  keypad_pin_=pinout;
+  debounceDelay_=debounceDelay;    
   }
   
   Keypad::~Keypad(){
@@ -23,7 +24,28 @@ namespace vibration_dispenser { namespace io {
   }
   
   Key Keypad::getKey(){
-    
+      
+      Key reading = checkKeys();
+      if (reading!=last_key_state_){
+      lastDebounceTime_ = millis();
+    }
+
+    if ((millis() - lastDebounceTime_) > debounceDelay_) {
+      if (reading!=key_state_)
+      {
+        key_state_=reading;        
+        if (key_state_!=Key::NO_KEY)
+        {
+          output_key_ = reading;
+        }
+      }
+              
+    }    
+    last_key_state_=reading;    
+    return output_key_;
+}
+
+Key Keypad::checkKeys(){
     int reading=analogRead(keypad_pin_);
     
     if (reading<RIGHT_VALUE)
@@ -42,13 +64,11 @@ namespace vibration_dispenser { namespace io {
     else if (reading<SELECT_VALUE) {
         return Key::SELECT;
     }
-    else
-    {
+    else{
         return Key::NO_KEY;
-    }
-    
-        
-  }
+    }    
+}
+
   
 // END OF NAMESPACES -----------------------------------------------------------
 }}

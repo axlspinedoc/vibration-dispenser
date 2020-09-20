@@ -17,13 +17,14 @@
 
 using namespace vibration_dispenser;
 
-io::Keypad interface(KEYPAD_PIN);
+io::Keypad interface(KEYPAD_PIN,50);
 
 LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
 void setup(){
   lcd.begin(LCD_COL,LCD_ROW);
   lcd.clear();      
+  Serial.begin(115200);
 }
 void loop(){
     lcd.setCursor(0,0);    
@@ -31,22 +32,27 @@ void loop(){
     {
     case Key::RIGHT:              
         lcd.print("Right ");
+        delay(200);
         break;
     case Key::UP:              
         lcd.print("Up    ");
+        delay(200);
         break;
     case Key::DOWN:              
         lcd.print("Down  ");
+        delay(200);
         break;
     case Key::LEFT:        
         lcd.print("Left  ");
+        delay(200);
         break;
     case Key::SELECT:        
         lcd.print("Select");
+        delay(200);
         break;
     
     default:
-        lcd.print("      ");
+        lcd.print("  .   ");
         break;
     }    
 }

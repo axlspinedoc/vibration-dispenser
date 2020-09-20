@@ -38,7 +38,7 @@ public:
   /**
    * Constructor
    * */
-  Keypad(int pinout);
+  Keypad(int pinout,unsigned long debounceDelay=500);
   /**
    * Destructor
    * */
@@ -55,16 +55,32 @@ public:
   /**
    * Brief of the function 
    * @param value[in]: Input value
-   * @return whatever it returns. 
+   * @return Key registered
    * */
   Key getKey();
   
 private:
 
+  /**
+   * Checks which key is pressed at the moment   
+   * @return Key registered
+   * */
+  Key checkKeys();
+
   // MEMBERS -------------------------------------------------------------------  
   
   // saves pin where keypad is attached
   int keypad_pin_;
+  // The binary output of the button 
+  Key output_key_=Key::NO_KEY;
+  // The actual state of the pin
+  Key key_state_;
+  // The previous state of the Keypad
+  Key last_key_state_=Key::NO_KEY;
+  // the last time a change in key state was recorded
+  unsigned long lastDebounceTime_=0;  
+  // the debounce time in millis; increase if the output flickers  
+  unsigned long debounceDelay_;
   
 }; // End of class Template
 
