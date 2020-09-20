@@ -6,7 +6,7 @@
 #define KEYPAD_PIN          A0
 #define DOOR_BUTTON_PIN     30
 #define DISPENSE_BUTTON_PIN 31
-#define SERVO_PIN           3
+#define SERVO_PIN           44
 
 // LCD Size 
 #define LCD_COL             16

@@ -28,7 +28,7 @@ public:
    * Constructor
    * Assigns attach pin and custom debounce delay time; ifnot defaults to 50ms
    * */
-  Button(int button_pin_, unsigned long debounceDelay=50);
+  Button(int button_pin_, unsigned long debounceDelay=80);
   /**
    * Destructor
    * */
