@@ -21,8 +21,8 @@
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
-io::Button door_button(DOOR_BUTTON_PIN);
-io::Button disp_button(DISPENSE_BUTTON_PIN);
+io::Button door_button(DOOR_BUTTON_PIN,100);
+io::Button disp_button(DISPENSE_BUTTON_PIN,100);
 // io::Keypad keypad(KEYPAD_PIN);
 // io::Screencom screen();
 
@@ -66,10 +66,7 @@ void setup() {
 void tick();
 
 void loop() {
-  
-  // Updates functions each cycle
-  tick();
-
+    
   if (Serial.available()>0)
   {
     if (Serial.available()==1)
@@ -96,6 +93,7 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
+      disp_button.tick();
       
 
       if (incomingChar=='W')
@@ -133,7 +131,7 @@ void loop() {
 
     case control::State::DISPENSING:
       
-      
+      disp_button.tick();
       if (incomingChar=='S' || disp_button.getState())
       {        
         disp_button.reset();
@@ -148,7 +146,7 @@ void loop() {
       break;  
 
     case control::State::SERVED:
-               
+      door_button.tick();             
       if (incomingChar=='F' || door_button.getState())
       {        
         door_button.reset();
@@ -164,7 +162,7 @@ void loop() {
       break;
 
     case control::State::FLUSH:      
-      
+      door_button.tick();
       if (incomingChar=='R' || door_button.getState())
       {        
         door_button.reset();
@@ -189,8 +187,8 @@ void loop() {
 //---------------------------------FUNCTIONS------------------------------------
 
 void tick(){
-  door_button.tick();
-  disp_button.tick();
+  //door_button.tick();
+  
 }
 
 //------------------------------END OF PROGRAM----------------------------------

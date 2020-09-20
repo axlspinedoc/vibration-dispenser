@@ -54,6 +54,8 @@ bool Button::getState(){
 
 void Button::reset(){
   output_state_=false;
+  // Give time to avoid false clicks 
+  delay(debounceDelay_);
 }
 
 // END OF NAMESPACES -----------------------------------------------------------
