@@ -61,7 +61,7 @@ private:
   // saves pin where button is attached
   int button_pin_;
   // The binary output of the button 
-  int output_state_=HIGH;
+  int output_state_=false;
   // The actual state of the pin
   int button_state_;
   // The previous state of the pin

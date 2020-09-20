@@ -16,7 +16,7 @@ namespace vibration_dispenser { namespace io {
 Button::Button(int pinout,unsigned long debounceDelay){
   button_pin_=pinout;
   pinMode(pinout,INPUT_PULLUP);
-  debounceDelay_=debounceDelay;  
+  debounceDelay_=debounceDelay;    
 }
   
 Button::~Button(){
@@ -36,10 +36,10 @@ void Button::tick(){
       if (reading!=button_state_)
       {
         button_state_=reading;        
-      }
-      if (button_state_==HIGH)
-      {
-        output_state_ = true;
+        if (button_state_==LOW)
+        {
+          output_state_ = true;
+        }
       }
               
     }    
@@ -79,7 +79,7 @@ bool Button::getState(){
 }
 
 void Button::reset(){
-  output_state_=LOW;
+  output_state_=false;
 }
 
 // END OF NAMESPACES -----------------------------------------------------------

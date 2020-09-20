@@ -4,7 +4,7 @@
 
 // Pinout definition
 #define KEYPAD_PIN          A0
-#define DOOR_BUTTON_PIN     5
+#define DOOR_BUTTON_PIN     30
 #define DISPENSE_BUTTON_PIN 31
 #define SERVO_PIN           3
 
