@@ -46,7 +46,7 @@ public:
    * Constantly checks for a state change in the pin. After completing debounce
    * time, output state changes to true. Output state must be reset after read.   
    * */
-  void tick();
+  void update();
 
   // FUNCTIONS -----------------------------------------------------------------
   /**

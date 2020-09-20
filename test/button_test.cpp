@@ -26,8 +26,8 @@ void setup(){
 }
 void loop(){
         
-    test_button1.tick();
-    test_button2.tick();
+    test_button1.update();
+    test_button2.update();
 
     if (test_button1.getState())
     {

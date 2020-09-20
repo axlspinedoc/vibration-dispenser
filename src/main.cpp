@@ -93,7 +93,7 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
-      disp_button.tick();
+      disp_button.update();
       
 
       if (incomingChar=='W')
@@ -131,7 +131,7 @@ void loop() {
 
     case control::State::DISPENSING:
       
-      disp_button.tick();
+      disp_button.update();
       if (incomingChar=='S' || disp_button.getState())
       {        
         disp_button.reset();
@@ -146,7 +146,7 @@ void loop() {
       break;  
 
     case control::State::SERVED:
-      door_button.tick();             
+      door_button.update();             
       if (incomingChar=='F' || door_button.getState())
       {        
         door_button.reset();
@@ -162,7 +162,7 @@ void loop() {
       break;
 
     case control::State::FLUSH:      
-      door_button.tick();
+      door_button.update();
       if (incomingChar=='R' || door_button.getState())
       {        
         door_button.reset();
@@ -186,9 +186,5 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
-void tick(){
-  //door_button.tick();
-  
-}
 
 //------------------------------END OF PROGRAM----------------------------------

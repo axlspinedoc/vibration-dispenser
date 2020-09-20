@@ -25,7 +25,7 @@ Button::~Button(){
 
 // Constantly checks for a state change in the pin. After completing debounce
 // time, output state changes to true. Output state must be reset after read.
-void Button::tick(){
+void Button::update(){
   
     int reading=digitalRead(button_pin_);
     if (reading!=last_button_state_){
