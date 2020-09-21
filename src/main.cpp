@@ -13,16 +13,18 @@
 #include <Servo.h>
 #include "../lib/inc/utilites.h"
 #include "../lib/state_machine/state_machine.h"
-#include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../lib/io/button.h"
-#include "../lib/io/keypad.h"
 #include "../lib/io/screencom.h"
+#include "../lib/scale/HX711.h"
+//#include "../lib/io/keypad.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
-// io::Button door_button(DOOR_BUTTON);
-// io::Button disp_button(DISPENSE_BUTTON);
+io::Button door_button(DOOR_BUTTON_PIN,100);
+io::Button disp_button(DISPENSE_BUTTON_PIN,100);
+
+//HX711 scale;
 // io::Keypad keypad(KEYPAD_PIN);
 // io::Screencom screen();
 
@@ -30,11 +32,11 @@ control::State_machine machine_state;
 Servo door_servo;
 
 // Screencom
-LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
+LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
 // Serial comm DEBUGGING
 char incomingChar;
-int weight=0;
+int weight=700;
 bool weight_changed=false;
 
 void setup() {
@@ -43,32 +45,34 @@ void setup() {
   Serial.println("System initialized");
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
+
+//   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+//   scale.set_scale(SCALE_GRAMS);
+//   scale.tare();  
   
-  lcd.begin();
-  lcd.clear();  
-  lcd.setCursor(1,1);
-  lcd.print("System initialized");
-  lcd.setCursor(1,3);
+  lcd.begin(LCD_COL,LCD_ROW);
+  lcd.clear();    
+  lcd.setCursor(0,0);  
+  lcd.print("Sistema iniciado");
+  lcd.setCursor(0,1);
   lcd.print("V0.1");
   delay(2000);
 
   lcd.clear();
-  lcd.print("Presione D para");
+  lcd.setCursor(0,0);
+  lcd.print("Presione D");
   lcd.setCursor(0,1);
-  lcd.print("dispensar");
-  lcd.setCursor(0,2);      
-  lcd.print("Presione W para");
-  lcd.setCursor(0,3);
-  lcd.print("cambiar gramaje");
+  lcd.print("para dispensar");
+  
 }
 
-// Forward declarations
+// Forward declarations --------------------------------------------------------
 
 // Checks status of functions inside on each loop
 void tick();
 
 void loop() {
-  
+    
   if (Serial.available()>0)
   {
     if (Serial.available()==1)
@@ -95,6 +99,7 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
+      disp_button.update();
       
 
       if (incomingChar=='W')
@@ -102,16 +107,13 @@ void loop() {
         machine_state.setState(control::State::SETGRAMS);
         Serial.println("State:= SETGRAMS");
         
-      } else if(incomingChar=='D'){
-
+      } else if(incomingChar=='D' || disp_button.getState()){
+        disp_button.reset();
         machine_state.setState(control::State::DISPENSING);
-        Serial.println("State:= DISPENSING");
+        
+        Serial.println("State:= DISPENSING");        
         lcd.clear();
-        lcd.print("Dispensando...");      
-        lcd.setCursor(0,2);      
-        lcd.print("Presione S para");
-        lcd.setCursor(0,3);
-        lcd.print("detener dispensado");                    
+        lcd.print("Dispensando...");              
       }     
       break;
     
@@ -133,10 +135,17 @@ void loop() {
 
     case control::State::DISPENSING:
       
+      disp_button.update();
+    //   long read_weight = scale.get_units(10);
+    //   lcd.setCursor(0,1);      
+    //   lcd.print(read_weight);
       
-      if (incomingChar=='S')
+      //if ((read_weight>=weight) || disp_button.getState())
+      if (disp_button.getState())
       {        
+        disp_button.reset();
         machine_state.setState(control::State::SERVED);
+        
         Serial.println("State:= SERVED");
         lcd.clear();
         lcd.print("Presione F para");   
@@ -146,10 +155,12 @@ void loop() {
       break;  
 
     case control::State::SERVED:
-               
-      if (incomingChar=='F')
+      door_button.update();             
+      if (incomingChar=='F' || door_button.getState())
       {        
+        door_button.reset();
         machine_state.setState(control::State::FLUSH);
+        
         Serial.println("State:= FLUSH");
         door_servo.write(DOOR_OPEN);      
         lcd.clear();
@@ -160,20 +171,19 @@ void loop() {
       break;
 
     case control::State::FLUSH:      
-      
-      if (incomingChar=='R')
+      door_button.update();
+      if (incomingChar=='R' || door_button.getState())
       {        
+        door_button.reset();
         machine_state.setState(control::State::STANDBY);
+        
         Serial.println("State:= STANDBY");
         door_servo.write(DOOR_CLOSED);
         lcd.clear();
-        lcd.print("Presione D para");
+        lcd.setCursor(0,0);
+        lcd.print("Presione D");
         lcd.setCursor(0,1);
-        lcd.print("dispensar");
-        lcd.setCursor(0,2);      
-        lcd.print("Presione W para");
-        lcd.setCursor(0,3);
-        lcd.print("cambiar gramaje");
+        lcd.print("para dispensar");
       }
       
       break;
@@ -185,8 +195,5 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
-void tick(){
-  // door_button.tick();
-  // disp_button.tick();
-}
 
+//------------------------------END OF PROGRAM----------------------------------

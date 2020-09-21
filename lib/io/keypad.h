@@ -6,8 +6,8 @@
 //------------------------------------------------------------------------------
 
 // IFNDEF ----------------------------------------------------------------------
-#ifndef TEMPLATE_H_
-#define TEMPLATE_H_
+#ifndef KEYPAD_H_
+#define KEYPAD_H_
 
 // DEFINES ---------------------------------------------------------------------
 
@@ -23,7 +23,8 @@ enum class Key{
   UP,
   DOWN,
   LEFT,
-  SELECT
+  SELECT,
+  NO_KEY
 };
 
 // NAMESPACES ------------------------------------------------------------------
@@ -54,16 +55,26 @@ public:
   /**
    * Brief of the function 
    * @param value[in]: Input value
-   * @return whatever it returns. 
+   * @return Key registered
    * */
   Key getKey();
   
+
+  /**
+   * Checks which key is pressed at the moment   
+   * @return Key registered
+   * */
+  Key checkKeys();
 private:
 
   // MEMBERS -------------------------------------------------------------------  
   
   // saves pin where keypad is attached
   int keypad_pin_;
+  // The previous state of the Keypad
+  Key last_key_state_=Key::NO_KEY;
+  
+  
   
 }; // End of class Template
 

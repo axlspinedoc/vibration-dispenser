@@ -16,7 +16,7 @@ namespace vibration_dispenser { namespace io {
 Button::Button(int pinout,unsigned long debounceDelay){
   button_pin_=pinout;
   pinMode(pinout,INPUT_PULLUP);
-  debounceDelay_=debounceDelay;  
+  debounceDelay_=debounceDelay;    
 }
   
 Button::~Button(){
@@ -25,33 +25,37 @@ Button::~Button(){
 
 // Constantly checks for a state change in the pin. After completing debounce
 // time, output state changes to true. Output state must be reset after read.
-void Button::tick(){
+void Button::update(){
   
     int reading=digitalRead(button_pin_);
-    if (reading!=last_button_state_)
-      lastDebounceTime_=millis();
-
+    if (reading!=last_button_state_){
+      lastDebounceTime_ = millis();
+    }
 
     if ((millis() - lastDebounceTime_) > debounceDelay_) {
       if (reading!=button_state_)
       {
-        button_state_=reading;
-        output_state_=true;
+        button_state_=reading;        
+        if (button_state_==LOW)
+        {
+          output_state_ = true;
+        }
       }
-        
-    }
-    
+              
+    }    
     last_button_state_=reading;
 }
 
 // Checks pin state and assures debounce time has passed. Ifnot, returns last
 // registered state
-int Button::getState(){
+bool Button::getState(){
   return output_state_;
 }
 
 void Button::reset(){
-  output_state_=LOW;
+  output_state_=false;
+  // Give time to avoid false clicks 
+  delay(debounceDelay_);
 }
 
 // END OF NAMESPACES -----------------------------------------------------------
