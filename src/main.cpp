@@ -24,7 +24,8 @@ control::State_machine machine_state;
 io::Button door_button(DOOR_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
 
-//HX711 scale;
+HX711 scale;
+
 // io::Keypad keypad(KEYPAD_PIN);
 // io::Screencom screen();
 
@@ -36,8 +37,9 @@ LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
 // Serial comm DEBUGGING
 char incomingChar;
-int weight=700;
+int weight=1000;
 bool weight_changed=false;
+long read_weight;
 
 void setup() {
   
@@ -46,9 +48,9 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
 
-//   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
-//   scale.set_scale(SCALE_GRAMS);
-//   scale.tare();  
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+  scale.set_scale(SCALE_GRAMS);
+  scale.tare();  
   
   lcd.begin(LCD_COL,LCD_ROW);
   lcd.clear();    
@@ -136,12 +138,14 @@ void loop() {
     case control::State::DISPENSING:
       
       disp_button.update();
-    //   long read_weight = scale.get_units(10);
-    //   lcd.setCursor(0,1);      
-    //   lcd.print(read_weight);
+      read_weight = scale.get_units();
+      lcd.setCursor(0,1);
+      lcd.print("     ");
+      lcd.setCursor(0,1);      
+      lcd.print(read_weight);
       
-      //if ((read_weight>=weight) || disp_button.getState())
-      if (disp_button.getState())
+      if ((read_weight>=weight) || disp_button.getState())
+      //if (disp_button.getState())
       {        
         disp_button.reset();
         machine_state.setState(control::State::SERVED);
