@@ -26,6 +26,9 @@ const int pin_BL = 10;
 #define DOOR_CLOSED     0
 #define DOOR_OPEN       45
 
+#define SCALE_GRAMS     257
+
+// Keypad resistor values
 #define RIGHT_VALUE     60
 #define UP_VALUE        200
 #define DOWN_VALUE      400

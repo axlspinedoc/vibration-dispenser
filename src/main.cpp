@@ -1,59 +1,48 @@
-//------------------------------------------------------------------------------
-// @file: button_test.cpp
-// @author: Axel Sandoval
-// @e-mail: axel_isc@hotmail.com
-// @created on: September 15, 2020
-// 
-//
-// @brief: Test code for Button library
-// LICENCE
-//------------------------------------------------------------------------------
-
+ 
 #include <Arduino.h>
-#include "../lib/inc/utilites.h"
-#include "../lib/io/keypad.h"
-#include "../lib/Keypad_shield/LiquidCrystal.h"
+#include "HX711.h"
 
+// HX711 circuit wiring
+const int LOADCELL_DOUT_PIN = 52;
+const int LOADCELL_SCK_PIN = 53;
+long first_read;
+float SCALE;
+float OFFSET;
 
-using namespace vibration_dispenser;
+HX711 scale;
 
-io::Keypad interface(KEYPAD_PIN);
-
-LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
-
-void setup(){
-  lcd.begin(LCD_COL,LCD_ROW);
-  lcd.clear();      
+void setup() {
   Serial.begin(115200);
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.set_scale();
+  scale.tare();
+  Serial.println("Load cell initialized");
+  delay(1000);
+
+  Serial.println("Place known weight");
+  delay(8000);  
+  first_read=scale.get_units(10);
+  
+  SCALE=first_read/710;
+  Serial.print("Scale= ");
+  Serial.println(SCALE);  
+  
+  
+  scale.set_scale(SCALE);
+  delay(5000);
+  
 }
-void loop(){
-    lcd.setCursor(0,0);    
-    switch (interface.checkKeys())
-    {
-    case Key::RIGHT:              
-        lcd.print("Right ");
-        //delay(200);
-        break;
-    case Key::UP:              
-        lcd.print("Up    ");
-        //delay(200);
-        break;
-    case Key::DOWN:              
-        lcd.print("Down  ");
-        //delay(200);
-        break;
-    case Key::LEFT:        
-        lcd.print("Left  ");
-        //delay(200);
-        break;
-    case Key::SELECT:        
-        lcd.print("Select");
-        //delay(200);
-        break;
-    
-    default:
-        lcd.print("  ..  ");
-        break;
-    }    
+
+void loop() {    
+  
+  if (scale.wait_ready_timeout(1000)) {
+    long reading = scale.get_units();
+    Serial.print("HX711 reading: ");
+    Serial.println(reading);
+  } else {
+    Serial.println("HX711 not found.");
+  }
+
+  delay(200);
+  
 }
-//----------------------END OF UNIT TEST----------------------------------------
