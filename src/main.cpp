@@ -1,48 +1,199 @@
- 
+//------------------------------------------------------------------------------
+// @file: main.cpp
+// @author: Axel Sandoval
+// @e-mail: axel_isc@hotmail.com
+// @created on: September 15, 2020
+// 
+//
+// @brief: Source code for a vibration dispenser machine with scalability.
+// LICENCE
+//------------------------------------------------------------------------------
+
 #include <Arduino.h>
-#include "HX711.h"
+#include <Servo.h>
+#include "../lib/inc/utilites.h"
+#include "../lib/state_machine/state_machine.h"
+#include "../lib/io/button.h"
+#include "../lib/io/screencom.h"
+#include "../lib/scale/HX711.h"
+//#include "../lib/io/keypad.h"
 
-// HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 52;
-const int LOADCELL_SCK_PIN = 53;
-long first_read;
-float SCALE;
-float OFFSET;
+using namespace vibration_dispenser;
 
-HX711 scale;
+control::State_machine machine_state;
+io::Button door_button(DOOR_BUTTON_PIN,100);
+io::Button disp_button(DISPENSE_BUTTON_PIN,100);
+
+//HX711 scale;
+// io::Keypad keypad(KEYPAD_PIN);
+// io::Screencom screen();
+
+
+Servo door_servo;
+
+// Screencom
+LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
+
+// Serial comm DEBUGGING
+char incomingChar;
+int weight=700;
+bool weight_changed=false;
 
 void setup() {
+  
   Serial.begin(115200);
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-  scale.set_scale();
-  scale.tare();
-  Serial.println("Load cell initialized");
-  delay(1000);
+  Serial.println("System initialized");
+  door_servo.attach(SERVO_PIN);
+  door_servo.write(DOOR_CLOSED);
 
-  Serial.println("Place known weight");
-  delay(8000);  
-  first_read=scale.get_units(10);
+//   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+//   scale.set_scale(SCALE_GRAMS);
+//   scale.tare();  
   
-  SCALE=first_read/710;
-  Serial.print("Scale= ");
-  Serial.println(SCALE);  
-  
-  
-  scale.set_scale(SCALE);
-  delay(5000);
+  lcd.begin(LCD_COL,LCD_ROW);
+  lcd.clear();    
+  lcd.setCursor(0,0);  
+  lcd.print("Sistema iniciado");
+  lcd.setCursor(0,1);
+  lcd.print("V0.1");
+  delay(2000);
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Presione D");
+  lcd.setCursor(0,1);
+  lcd.print("para dispensar");
   
 }
 
-void loop() {    
-  
-  if (scale.wait_ready_timeout(1000)) {
-    long reading = scale.get_units();
-    Serial.print("HX711 reading: ");
-    Serial.println(reading);
-  } else {
-    Serial.println("HX711 not found.");
+// Forward declarations --------------------------------------------------------
+
+// Checks status of functions inside on each loop
+void tick();
+
+void loop() {
+    
+  if (Serial.available()>0)
+  {
+    if (Serial.available()==1)
+    {
+      // Single key: Next Stage
+      incomingChar=Serial.read();
+    }else{
+      // Char chain: Set Weight
+      
+      int bytesAvailable=Serial.available();          
+      String serialBuffer="";
+
+      for (int idx = 0; idx<bytesAvailable;  idx++) {            
+        char input_char = Serial.read();            
+        serialBuffer = serialBuffer + input_char;            
+        }
+      weight=serialBuffer.toInt();
+      weight_changed=true;
+      
+    }
+    
   }
-
-  delay(200);
   
+    switch (machine_state.getState())
+    {
+    case control::State::STANDBY:
+      disp_button.update();
+      
+
+      if (incomingChar=='W')
+      {
+        machine_state.setState(control::State::SETGRAMS);
+        Serial.println("State:= SETGRAMS");
+        
+      } else if(incomingChar=='D' || disp_button.getState()){
+        disp_button.reset();
+        machine_state.setState(control::State::DISPENSING);
+        
+        Serial.println("State:= DISPENSING");        
+        lcd.clear();
+        lcd.print("Dispensando...");              
+      }     
+      break;
+    
+    case control::State::SETGRAMS:
+      
+      if (weight_changed)
+      {
+        Serial.print("Weight set to= ");
+        Serial.println(weight);
+        weight_changed=false;
+      }    
+      
+      if (incomingChar=='Q')
+      {        
+        machine_state.setState(control::State::STANDBY);
+        Serial.println("State:= STANDBY");
+      }
+      break;
+
+    case control::State::DISPENSING:
+      
+      disp_button.update();
+    //   long read_weight = scale.get_units(10);
+    //   lcd.setCursor(0,1);      
+    //   lcd.print(read_weight);
+      
+      //if ((read_weight>=weight) || disp_button.getState())
+      if (disp_button.getState())
+      {        
+        disp_button.reset();
+        machine_state.setState(control::State::SERVED);
+        
+        Serial.println("State:= SERVED");
+        lcd.clear();
+        lcd.print("Presione F para");   
+        lcd.setCursor(0,1);
+        lcd.print("vaciar tolva");
+      }
+      break;  
+
+    case control::State::SERVED:
+      door_button.update();             
+      if (incomingChar=='F' || door_button.getState())
+      {        
+        door_button.reset();
+        machine_state.setState(control::State::FLUSH);
+        
+        Serial.println("State:= FLUSH");
+        door_servo.write(DOOR_OPEN);      
+        lcd.clear();
+        lcd.print("Presione R para"); 
+        lcd.setCursor(0,1);
+        lcd.print("terminar vaciado"); 
+      }
+      break;
+
+    case control::State::FLUSH:      
+      door_button.update();
+      if (incomingChar=='R' || door_button.getState())
+      {        
+        door_button.reset();
+        machine_state.setState(control::State::STANDBY);
+        
+        Serial.println("State:= STANDBY");
+        door_servo.write(DOOR_CLOSED);
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Presione D");
+        lcd.setCursor(0,1);
+        lcd.print("para dispensar");
+      }
+      
+      break;
+
+    default:
+      break;
+    }  
 }
+
+//---------------------------------FUNCTIONS------------------------------------
+
+
+//------------------------------END OF PROGRAM----------------------------------
