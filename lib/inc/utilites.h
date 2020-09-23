@@ -25,7 +25,7 @@
 
 // Servo positions
 #define DOOR_CLOSED         0
-#define DOOR_OPEN           45
+#define DOOR_OPEN           135
 
 // Scale definition
 #define SCALE_GRAMS         257
