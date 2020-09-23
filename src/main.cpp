@@ -71,7 +71,7 @@ void setup() {
   // Screencom
   lcd.begin(LCD_COL,LCD_ROW);
   setScreen(Screen::SPLASH);
-  delay(2000);
+  delay(800);
   machine_state.setState(control::State::STANDBY);
   setScreen(Screen::STANDBY);
   
@@ -193,6 +193,11 @@ void loop() {
 
 
 void setScreen(Screen menu){
+  if (menu!=Screen::SETWEIGHT)
+  {
+    lcd.noBlink();
+  }
+  
   switch (menu)
   {
   case Screen::SPLASH:
@@ -258,18 +263,26 @@ void setWeightScreen(){
   lcd.print("Peso prog.");
   if (weight<1000)
   {
-    lcd.setCursor(14,0);
+    lcd.setCursor(12,0);
     lcd.print(weight);
+    lcd.print("g");
     lcd.setCursor(0,1);
     lcd.print("Nuevo peso");
-    lcd.setCursor(13,1);
+    lcd.setCursor(12,1);
+    lcd.print(weight);
+    lcd.print("g");
+    lcd.setCursor(12,1);
     lcd.blink();    
   }else{
-    lcd.setCursor(13,0);
+    lcd.setCursor(11,0);
     lcd.print(weight);
+    lcd.print("g");
     lcd.setCursor(0,1);
     lcd.print("Nuevo peso");
-    lcd.setCursor(13,1);
+    lcd.setCursor(11,1);
+    lcd.print(weight);
+    lcd.print("g");
+    lcd.setCursor(11,1);
     lcd.blink();
   }
 }
