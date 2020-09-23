@@ -37,7 +37,7 @@ enum class Screen{
 };
 
 // CLASS DECLARATION -----------------------------------------------------------
-class Screencom {
+class Screencom{
 public:
 
   // CONSTRUCTOR AND DESTRUCTOR ------------------------------------------------
