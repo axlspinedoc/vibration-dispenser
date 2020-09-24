@@ -65,6 +65,9 @@ public:
    * @return Key registered
    * */
   Key checkKeys();
+
+  void resetKeys();
+
 private:
 
   // MEMBERS -------------------------------------------------------------------  
@@ -73,6 +76,8 @@ private:
   int keypad_pin_;
   // The previous state of the Keypad
   Key last_key_state_=Key::NO_KEY;
+
+  Key output_key_=Key::NO_KEY;
   
   
   

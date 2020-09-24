@@ -24,23 +24,20 @@ namespace vibration_dispenser { namespace io {
   
   Key Keypad::getKey(){
 
-    Key key_state = checkKeys();
-    Key output_key;
+    Key key_state = checkKeys();    
+    
     if (key_state!=last_key_state_)
     {
-        if (key_state==Key::NO_KEY)
+        if (last_key_state_!=Key::NO_KEY)
         {
-            output_key=last_key_state_;
-            key_state=last_key_state_;
+            output_key_=key_state;
+            last_key_state_=key_state;
         } else
         {
-            last_key_state_=key_state;
-            output_key=Key::NO_KEY;
-        }
-        output_key=Key::NO_KEY;                
-    }
-            
-    return output_key;
+            last_key_state_=key_state;            
+        }                    
+    }            
+    return output_key_;
 }
 
 Key Keypad::checkKeys(){
@@ -67,6 +64,9 @@ Key Keypad::checkKeys(){
     }    
 }
 
+void Keypad::resetKeys(){
+    output_key_=Key::NO_KEY;
+}
   
 // END OF NAMESPACES -----------------------------------------------------------
 }}
