@@ -28,9 +28,11 @@ namespace vibration_dispenser { namespace io {
     
     if (key_state!=last_key_state_)
     {
+        Serial.println("Change detected");        
         if (last_key_state_!=Key::NO_KEY)
         {
-            output_key_=key_state;
+            Serial.println("change X_KEY->NO_KEY");
+            output_key_=last_key_state_;
             last_key_state_=key_state;
         } else
         {

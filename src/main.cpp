@@ -18,6 +18,8 @@
 using namespace vibration_dispenser;
 
 io::Keypad interface(KEYPAD_PIN);
+Key last_key_state_=Key::NO_KEY;
+Key output_key_=Key::NO_KEY;
 
 LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
@@ -27,33 +29,46 @@ void setup(){
   Serial.begin(115200);
 }
 void loop(){
+           
+    
+    // switch (interface.getKey())
+    // {
+    // case Key::UP:
+    //   Serial.println("UP");
+    //   output_key_=Key::NO_KEY;
+    //   break;
+    
+    // default:
+    //   break;
+    // }
+    
     lcd.setCursor(0,0);    
-    switch (interface.checkKeys())
+    switch (interface.getKey())
     {
     case Key::RIGHT:              
         interface.resetKeys();
         lcd.print("Right ");
-        //delay(200);
+        delay(100);
         break;
     case Key::UP:              
         interface.resetKeys();
         lcd.print("Up    ");
-        //delay(200);
+        delay(100);
         break;
     case Key::DOWN:              
         interface.resetKeys();
         lcd.print("Down  ");
-        //delay(200);
+        delay(100);
         break;
     case Key::LEFT:        
         interface.resetKeys();
         lcd.print("Left  ");
-        //delay(200);
+        delay(100);
         break;
     case Key::SELECT:        
         interface.resetKeys();
         lcd.print("Select");
-        //delay(200);
+        delay(100);
         break;
     
     default:

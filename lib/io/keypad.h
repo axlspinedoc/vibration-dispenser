@@ -45,13 +45,7 @@ public:
   ~Keypad();
 
   // FUNCTIONS -----------------------------------------------------------------
-  /**
-   * Brief of the function 
-   * @param value[in]: Input value
-   * @return whatever it returns. 
-   * */
-  void publicFunction(const long &value = 0);  
-
+  
   /**
    * Brief of the function 
    * @param value[in]: Input value
@@ -59,7 +53,6 @@ public:
    * */
   Key getKey();
   
-
   /**
    * Checks which key is pressed at the moment   
    * @return Key registered
