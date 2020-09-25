@@ -54,7 +54,7 @@ void standbyScreen();
 void dispensingScreen();
 void servedScreen();
 void openDoorScreen();
-void setWeightScreen(int old_weight, int new_weight);
+void setWeightScreen(int old_weight, int new_weight, int col = 14);
 void weightConfirmedScreen();
 void errorScreen();
 int manageWeight(int saved_weight);
@@ -257,33 +257,36 @@ void openDoorScreen(){
   lcd.setCursor(0,1);
   lcd.print("terminar vaciado");
 }
-void setWeightScreen(int old_weight, int new_weight){
+void setWeightScreen(int old_weight, int new_weight, int col){
   lcd.clear();
   lcd.print("Peso prog.");
+  lcd.setCursor(0,1);
+  lcd.print("Nuevo peso");
+  lcd.setCursor(15,0);
+  lcd.print("g");
+  lcd.setCursor(15,1);
+  lcd.print("g");
+  
   if (new_weight<1000)
+  {
+        
+    lcd.setCursor(12,1);
+    lcd.print(new_weight);    
+  }else{    
+    lcd.setCursor(11,1);
+    lcd.print(new_weight);        
+  }
+  if (old_weight<1000)
   {
     lcd.setCursor(12,0);
     lcd.print(old_weight);
-    lcd.print("g");
-    lcd.setCursor(0,1);
-    lcd.print("Nuevo peso");
-    lcd.setCursor(12,1);
-    lcd.print(new_weight);
-    lcd.print("g");
-    lcd.setCursor(14,1);
-    lcd.blink();    
   }else{
     lcd.setCursor(11,0);
-    lcd.print(old_weight);
-    lcd.print("g");
-    lcd.setCursor(0,1);
-    lcd.print("Nuevo peso");
-    lcd.setCursor(11,1);
-    lcd.print(new_weight);
-    lcd.print("g");
-    lcd.setCursor(14,1);
-    lcd.blink();
+    lcd.print(old_weight);    
   }
+  
+  lcd.setCursor(col,1);
+  lcd.blink();
 }
 
 // Manages weight change screen. Allows user to change desired weight digit by
@@ -298,8 +301,7 @@ int manageWeight(int saved_weight){
         switch (interface.getKey())
         {
         case Key::RIGHT:              
-            interface.resetKeys();        
-            Serial.println("RIGHT");
+            interface.resetKeys();                    
                 if (col<14)
                 {            
                     ++col;
@@ -309,17 +311,28 @@ int manageWeight(int saved_weight){
         case Key::UP:              
             interface.resetKeys();        
             Serial.println("UP");
-            set_weight =1200;//+= (15-col)*10;
-            setWeightScreen(saved_weight,set_weight);
+            set_weight += pow(10,(14-col));
+            if (set_weight>=2000)
+            {
+                set_weight=2000;
+            }            
+            
+            setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::DOWN:              
             interface.resetKeys();        
             Serial.println("DOWN");
-
+            set_weight -= pow(10,(14-col));
+            if (set_weight>=2000)
+            {
+                set_weight=2000;
+            }
+            
+            
+            setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::LEFT:        
-            interface.resetKeys();                
-            Serial.println("LEFT");
+            interface.resetKeys();                            
                 if (col>11)
                 {            
                     --col;
