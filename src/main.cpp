@@ -16,18 +16,18 @@
 #include "../lib/io/button.h"
 #include "../lib/scale/HX711.h"
 #include "../lib/io/screencom.h"
-//#include "../lib/io/keypad.h"
+#include "../lib/io/keypad.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
 io::Button door_button(DOOR_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
+io::Keypad keypad(KEYPAD_PIN);
 
 HX711 scale;
 Servo door_servo;
 
-// io::Keypad keypad(KEYPAD_PIN);
 
 // Screencom
 LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
@@ -44,8 +44,7 @@ enum class Screen{
 // Serial comm DEBUGGING
 char incomingChar;
 int weight=1000;
-bool weight_changed=false;
-long read_weight;
+int read_weight;
 
 // Forward definitions of Screencom
 void setScreen(Screen menu);
@@ -64,9 +63,16 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
 
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
-  scale.set_scale(SCALE_GRAMS);
-  scale.tare();  
+  if (scale.is_ready())
+  {
+    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+    scale.set_scale(SCALE_GRAMS);
+    scale.tare();        
+  }else{
+    // This should be an Error condition
+    Serial.println("Scale not detected");
+  }
+  
   
   // Screencom
   lcd.begin(LCD_COL,LCD_ROW);
@@ -86,21 +92,7 @@ void loop() {
     {
       // Single key: Next Stage
       incomingChar=Serial.read();
-    }else{
-      // Char chain: Set Weight
-      
-      int bytesAvailable=Serial.available();          
-      String serialBuffer="";
-
-      for (int idx = 0; idx<bytesAvailable;  idx++) {            
-        char input_char = Serial.read();            
-        serialBuffer = serialBuffer + input_char;            
-        }
-      weight=serialBuffer.toInt();
-      weight_changed=true;
-      
-    }
-    
+    }    
   }
   
     switch (machine_state.getState())
@@ -123,14 +115,7 @@ void loop() {
       break;
     
     case control::State::SETGRAMS:
-      
-      if (weight_changed)
-      {
-        Serial.print("Weight set to= ");
-        Serial.println(weight);
-        weight_changed=false;
-      }    
-      
+                  
       if (incomingChar=='Q')
       {        
         machine_state.setState(control::State::STANDBY);
@@ -149,8 +134,7 @@ void loop() {
       lcd.print(read_weight);
       
       
-      if ((read_weight>=weight) || disp_button.getState())
-      //if (disp_button.getState())
+      if ((read_weight>=weight) || disp_button.getState())      
       {        
         disp_button.reset();
         machine_state.setState(control::State::SERVED);        
@@ -184,7 +168,8 @@ void loop() {
       
       break;
 
-    default: //Unknown State, shouldn't be reachable
+    default: //Unknown State, shouldn't be reachable. Must prompt error.
+        machine_state.setState(control::State::ERROR);     
       break;
     }  
 }

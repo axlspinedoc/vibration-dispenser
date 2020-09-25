@@ -45,13 +45,7 @@ public:
   ~Keypad();
 
   // FUNCTIONS -----------------------------------------------------------------
-  /**
-   * Brief of the function 
-   * @param value[in]: Input value
-   * @return whatever it returns. 
-   * */
-  void publicFunction(const long &value = 0);  
-
+  
   /**
    * Brief of the function 
    * @param value[in]: Input value
@@ -59,12 +53,14 @@ public:
    * */
   Key getKey();
   
-
   /**
    * Checks which key is pressed at the moment   
    * @return Key registered
    * */
   Key checkKeys();
+
+  void resetKeys();
+
 private:
 
   // MEMBERS -------------------------------------------------------------------  
@@ -73,8 +69,8 @@ private:
   int keypad_pin_;
   // The previous state of the Keypad
   Key last_key_state_=Key::NO_KEY;
-  
-  
+
+  Key output_key_=Key::NO_KEY;
   
 }; // End of class Template
 
