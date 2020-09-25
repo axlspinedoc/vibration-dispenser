@@ -53,15 +53,15 @@ public:
    * */
   Key getKey();
   
+
+  void resetKeys();
+
+private:
   /**
    * Checks which key is pressed at the moment   
    * @return Key registered
    * */
   Key checkKeys();
-
-  void resetKeys();
-
-private:
 
   // MEMBERS -------------------------------------------------------------------  
   

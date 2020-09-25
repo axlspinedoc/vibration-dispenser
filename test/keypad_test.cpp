@@ -18,9 +18,6 @@
 using namespace vibration_dispenser;
 
 io::Keypad interface(KEYPAD_PIN);
-Key last_key_state_=Key::NO_KEY;
-Key output_key_=Key::NO_KEY;
-
 LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 
 void setup(){
