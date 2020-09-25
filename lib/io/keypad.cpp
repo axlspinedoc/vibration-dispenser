@@ -14,8 +14,9 @@ namespace vibration_dispenser { namespace io {
 
 // CLASS IMPLEMENTATION --------------------------------------------------------
 
-  Keypad::Keypad(int pinout){
-  keypad_pin_=pinout;     
+  Keypad::Keypad(int pinout, unsigned long debounce_time):
+                keypad_pin_(pinout),debounce_time_(debounce_time){
+  
   }
   
   Keypad::~Keypad(){
@@ -26,19 +27,20 @@ namespace vibration_dispenser { namespace io {
 
     Key key_state = checkKeys();    
     
-    if (key_state!=last_key_state_)
-    {
-        Serial.println("Change detected");        
-        if (last_key_state_!=Key::NO_KEY)
-        {
-            Serial.println("change X_KEY->NO_KEY");
-            output_key_=last_key_state_;
-            last_key_state_=key_state;
-        } else
-        {
-            last_key_state_=key_state;            
-        }                    
-    }            
+    // if (millis()-last_debounce_>debounce_time_)
+    // {                    
+        if (key_state!=last_key_state_)
+        {            
+            if (last_key_state_!=Key::NO_KEY)
+            {                
+                output_key_=last_key_state_;
+                last_key_state_=key_state;                        
+            } else
+            {
+                last_key_state_=key_state;            
+            }                    
+        }
+    // }            
     return output_key_;
 }
 
@@ -68,6 +70,7 @@ Key Keypad::checkKeys(){
 
 void Keypad::resetKeys(){
     output_key_=Key::NO_KEY;
+    last_debounce_=millis();
 }
   
 // END OF NAMESPACES -----------------------------------------------------------

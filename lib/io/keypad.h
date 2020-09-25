@@ -38,7 +38,7 @@ public:
   /**
    * Constructor
    * */
-  Keypad(int pinout);
+  Keypad(int pinout, unsigned long debounce_time=100);
   /**
    * Destructor
    * */
@@ -71,6 +71,9 @@ private:
   Key last_key_state_=Key::NO_KEY;
 
   Key output_key_=Key::NO_KEY;
+
+  unsigned long last_debounce_=0;
+  unsigned long debounce_time_;
   
   
   
