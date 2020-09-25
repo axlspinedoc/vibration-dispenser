@@ -38,7 +38,7 @@ public:
   /**
    * Constructor
    * */
-  Keypad(int pinout, unsigned long debounce_time=100);
+  Keypad(int pinout);
   /**
    * Destructor
    * */
@@ -71,11 +71,6 @@ private:
   Key last_key_state_=Key::NO_KEY;
 
   Key output_key_=Key::NO_KEY;
-
-  unsigned long last_debounce_=0;
-  unsigned long debounce_time_;
-  
-  
   
 }; // End of class Template
 
