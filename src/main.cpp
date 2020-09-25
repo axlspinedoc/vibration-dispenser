@@ -315,8 +315,7 @@ int manageWeight(int saved_weight){
             if (set_weight>=2000)
             {
                 set_weight=2000;
-            }            
-            
+            }                        
             setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::DOWN:              
@@ -326,9 +325,7 @@ int manageWeight(int saved_weight){
             if (set_weight>=2000)
             {
                 set_weight=2000;
-            }
-            
-            
+            }                        
             setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::LEFT:        
