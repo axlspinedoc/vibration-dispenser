@@ -29,6 +29,7 @@ HX711 scale;
 Servo door_servo;
 
 
+// TODO: Refactor inside screencom class
 // Screencom
 LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 enum class Screen{
@@ -41,12 +42,14 @@ enum class Screen{
     ERRORSCREEN
 };
 
+// TODO: Refactor inside Serial_Debug class
 // Serial comm DEBUGGING
 char incomingChar;
 int weight=1000;
 int read_weight;
 int new_weight;
 
+// TODO: Refactor inside screencom class
 // Forward definitions of Screencom
 void setScreen(Screen menu, int old_weight=0, int new_weight=0);
 void splashScreen();
@@ -58,6 +61,9 @@ void setWeightScreen(int old_weight, int new_weight, int col = 14);
 void weightConfirmedScreen();
 void errorScreen();
 int manageWeight(int saved_weight);
+
+// Forward definitions of vibrator
+void setVibration(int percentage);
 
 void setup() {
   
@@ -75,8 +81,7 @@ void setup() {
     // This should be an Error condition
     Serial.println("Scale not detected");
   }
-  
-  
+    
   // Screencom
   lcd.begin(LCD_COL,LCD_ROW);
   setScreen(Screen::SPLASH);
@@ -84,6 +89,11 @@ void setup() {
   machine_state.setState(control::State::STANDBY);
   setScreen(Screen::STANDBY);  
   
+  // Vibrator
+  pinMode(VIBRATOR_PIN, OUTPUT);
+
+  // Relays
+  pinMode(RELAY1,OUTPUT);
 }
 
 void loop() {
@@ -360,6 +370,11 @@ void weightConfirmedScreen(){
     lcd.setCursor(0,1);
     lcd.print("| exitosamente |");
     delay(1500);
+}
+
+void setVibration(int percentage){
+  int pwm=map(percentage,0,100,0,255);
+  analogWrite(VIBRATOR_PIN,pwm);
 }
 
 void errorScreen(){

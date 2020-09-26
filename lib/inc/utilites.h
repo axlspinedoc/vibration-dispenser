@@ -25,8 +25,7 @@
 
 // Servo positions
 #define DOOR_CLOSED         0
-#define DOOR_OPEN           135
-
+#define DOOR_OPEN           45
 // Scale definition
 #define SCALE_GRAMS         257
 
@@ -36,6 +35,12 @@
 #define DOWN_VALUE          400
 #define LEFT_VALUE          600
 #define SELECT_VALUE        800
+
+// Vibrator output pin
+#define VIBRATOR_PIN        45
+
+// Relays
+#define RELAY1              38
 
 // namespace vibration_dispenser definition
 namespace vibration_dispenser{} 
