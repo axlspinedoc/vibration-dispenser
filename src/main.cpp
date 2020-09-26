@@ -267,23 +267,30 @@ void setWeightScreen(int old_weight, int new_weight, int col){
   lcd.setCursor(15,1);
   lcd.print("g");
   
-  if (new_weight<1000)
-  {
-        
+  if (new_weight<10)
+  {        
+    lcd.setCursor(14,1);
+  }else if(new_weight<100){    
+    lcd.setCursor(13,1);
+  }else if (new_weight<1000){
     lcd.setCursor(12,1);
-    lcd.print(new_weight);    
-  }else{    
+  } else {
     lcd.setCursor(11,1);
-    lcd.print(new_weight);        
   }
-  if (old_weight<1000)
-  {
+  lcd.print(new_weight);
+  
+
+  if (old_weight<10)
+  {        
+    lcd.setCursor(14,0);
+  }else if(old_weight<100){    
+    lcd.setCursor(13,0);
+  }else if (old_weight<1000){
     lcd.setCursor(12,0);
-    lcd.print(old_weight);
-  }else{
+  } else {
     lcd.setCursor(11,0);
-    lcd.print(old_weight);    
   }
+  lcd.print(old_weight);
   
   lcd.setCursor(col,1);
   lcd.blink();
@@ -323,9 +330,9 @@ int manageWeight(int saved_weight){
             interface.resetKeys();        
             Serial.println("DOWN");
             set_weight -= increments[14-col];
-            if (set_weight>=2000)
+            if (set_weight<=0)
             {
-                set_weight=2000;
+                set_weight=0;
             }                        
             setWeightScreen(saved_weight,set_weight,col);
             break;
