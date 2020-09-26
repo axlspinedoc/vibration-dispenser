@@ -23,7 +23,7 @@ using namespace vibration_dispenser;
 control::State_machine machine_state;
 io::Button door_button(DOOR_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
-io::Keypad keypad(KEYPAD_PIN);
+io::Keypad interface(KEYPAD_PIN);
 
 HX711 scale;
 Servo door_servo;
@@ -45,16 +45,19 @@ enum class Screen{
 char incomingChar;
 int weight=1000;
 int read_weight;
+int new_weight;
 
 // Forward definitions of Screencom
-void setScreen(Screen menu);
+void setScreen(Screen menu, int old_weight=0, int new_weight=0);
 void splashScreen();
 void standbyScreen();
 void dispensingScreen();
 void servedScreen();
 void openDoorScreen();
-void setWeightScreen();
+void setWeightScreen(int old_weight, int new_weight, int col = 14);
+void weightConfirmedScreen();
 void errorScreen();
+int manageWeight(int saved_weight);
 
 void setup() {
   
@@ -77,10 +80,9 @@ void setup() {
   // Screencom
   lcd.begin(LCD_COL,LCD_ROW);
   setScreen(Screen::SPLASH);
-  delay(800);
+  delay(500);
   machine_state.setState(control::State::STANDBY);
-  setScreen(Screen::STANDBY);
-  
+  setScreen(Screen::STANDBY);  
   
 }
 
@@ -100,13 +102,16 @@ void loop() {
     case control::State::STANDBY:
       disp_button.update();
       
-      if (incomingChar=='W')
+      if (incomingChar=='W' || interface.getKey()==Key::SELECT)
       {
+        interface.resetKeys();
         machine_state.setState(control::State::SETGRAMS);
         Serial.println("State:= SETGRAMS");
-        setScreen(Screen::SETWEIGHT);
+        setScreen(Screen::SETWEIGHT,weight,weight);
         
-      } else if(incomingChar=='D' || disp_button.getState()){
+      }
+
+      if(incomingChar=='D' || disp_button.getState()){
         disp_button.reset();
         machine_state.setState(control::State::DISPENSING);        
         Serial.println("State:= DISPENSING"); 
@@ -115,7 +120,15 @@ void loop() {
       break;
     
     case control::State::SETGRAMS:
-                  
+
+      new_weight=manageWeight(weight);
+      incomingChar='Q'; // Forces exit of state
+      if (new_weight!=weight)
+      {
+          weight=new_weight;
+          weightConfirmedScreen();
+      }            
+          
       if (incomingChar=='Q')
       {        
         machine_state.setState(control::State::STANDBY);
@@ -127,6 +140,7 @@ void loop() {
     case control::State::DISPENSING:
       
       disp_button.update();
+      // TODO: Add "scale.is_ready() for protection and avoid hanging"
       read_weight = scale.get_units();
       lcd.setCursor(0,1);
       lcd.print("     ");
@@ -177,7 +191,7 @@ void loop() {
 //---------------------------------FUNCTIONS------------------------------------
 
 
-void setScreen(Screen menu){
+void setScreen(Screen menu, int old_weight, int new_weight){
   if (menu!=Screen::SETWEIGHT)
   {
     lcd.noBlink();
@@ -192,7 +206,7 @@ void setScreen(Screen menu){
     standbyScreen();
     break;
   case Screen::SETWEIGHT:
-    setWeightScreen();
+    setWeightScreen(old_weight,new_weight);
     break;
   case Screen::DISPENSING:
     dispensingScreen();
@@ -243,33 +257,109 @@ void openDoorScreen(){
   lcd.setCursor(0,1);
   lcd.print("terminar vaciado");
 }
-void setWeightScreen(){
+void setWeightScreen(int old_weight, int new_weight, int col){
   lcd.clear();
   lcd.print("Peso prog.");
-  if (weight<1000)
-  {
-    lcd.setCursor(12,0);
-    lcd.print(weight);
-    lcd.print("g");
-    lcd.setCursor(0,1);
-    lcd.print("Nuevo peso");
+  lcd.setCursor(0,1);
+  lcd.print("Nuevo peso");
+  lcd.setCursor(15,0);
+  lcd.print("g");
+  lcd.setCursor(15,1);
+  lcd.print("g");
+  
+  if (new_weight<10)
+  {        
+    lcd.setCursor(14,1);
+  }else if(new_weight<100){    
+    lcd.setCursor(13,1);
+  }else if (new_weight<1000){
     lcd.setCursor(12,1);
-    lcd.print(weight);
-    lcd.print("g");
-    lcd.setCursor(12,1);
-    lcd.blink();    
-  }else{
-    lcd.setCursor(11,0);
-    lcd.print(weight);
-    lcd.print("g");
-    lcd.setCursor(0,1);
-    lcd.print("Nuevo peso");
+  } else {
     lcd.setCursor(11,1);
-    lcd.print(weight);
-    lcd.print("g");
-    lcd.setCursor(11,1);
-    lcd.blink();
   }
+  lcd.print(new_weight);
+  
+
+  if (old_weight<10)
+  {        
+    lcd.setCursor(14,0);
+  }else if(old_weight<100){    
+    lcd.setCursor(13,0);
+  }else if (old_weight<1000){
+    lcd.setCursor(12,0);
+  } else {
+    lcd.setCursor(11,0);
+  }
+  lcd.print(old_weight);
+  
+  lcd.setCursor(col,1);
+  lcd.blink();
+}
+
+// Manages weight change screen. Allows user to change desired weight digit by
+// digit.
+int manageWeight(int saved_weight){
+    
+    int set_weight=saved_weight;
+    int col=14;
+    int increments[4] = {1,10,100,1000};    
+    
+    while (interface.getKey()!=Key::SELECT)
+    {
+        switch (interface.getKey())
+        {
+        case Key::RIGHT:              
+            interface.resetKeys();                    
+                if (col<14)
+                {            
+                    ++col;
+                    lcd.setCursor(col,1);
+                }        
+            break;
+        case Key::UP:              
+            interface.resetKeys();        
+            Serial.println("UP");
+            set_weight += increments[14-col];
+            if (set_weight>=2000)
+            {
+                set_weight=2000;
+            }                        
+            setWeightScreen(saved_weight,set_weight,col);
+            break;
+        case Key::DOWN:              
+            interface.resetKeys();        
+            Serial.println("DOWN");
+            set_weight -= increments[14-col];
+            if (set_weight<=0)
+            {
+                set_weight=0;
+            }                        
+            setWeightScreen(saved_weight,set_weight,col);
+            break;
+        case Key::LEFT:        
+            interface.resetKeys();                            
+                if (col>11)
+                {            
+                    --col;
+                    lcd.setCursor(col,1);
+                }
+            break;        
+        
+        default:        
+            break;
+            }    
+        }
+    interface.resetKeys();
+    return set_weight;       
+}
+
+void weightConfirmedScreen(){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("|Peso  cambiado|");
+    lcd.setCursor(0,1);
+    lcd.print("| exitosamente |");
+    delay(1500);
 }
 
 void errorScreen(){
