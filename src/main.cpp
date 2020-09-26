@@ -294,7 +294,8 @@ void setWeightScreen(int old_weight, int new_weight, int col){
 int manageWeight(int saved_weight){
     
     int set_weight=saved_weight;
-    int col=14;    
+    int col=14;
+    int increments[4] = {1,10,100,1000};    
     
     while (interface.getKey()!=Key::SELECT)
     {
@@ -311,7 +312,7 @@ int manageWeight(int saved_weight){
         case Key::UP:              
             interface.resetKeys();        
             Serial.println("UP");
-            set_weight += pow(10,(14-col));
+            set_weight += increments[14-col];
             if (set_weight>=2000)
             {
                 set_weight=2000;
@@ -321,7 +322,7 @@ int manageWeight(int saved_weight){
         case Key::DOWN:              
             interface.resetKeys();        
             Serial.println("DOWN");
-            set_weight -= pow(10,(14-col));
+            set_weight -= increments[14-col];
             if (set_weight>=2000)
             {
                 set_weight=2000;
