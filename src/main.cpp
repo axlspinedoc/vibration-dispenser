@@ -76,7 +76,7 @@ void setup() {
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
   
   //if (scale.wait_ready_retry(20,100))  
-  if (scale.is_ready())  
+  if (scale.is_ready())
   {    
     scale.set_scale(SCALE_GRAMS);
     scale.tare();        
@@ -162,7 +162,8 @@ void loop() {
         Serial.println(progress);
       } else {
         machine_state.setState(control::State::ERROR);
-        errorScreen("Falla en bascula");
+        Serial.println("State:= ERROR");
+        errorScreen("Falla en bascula");        
         break;
       }
                   
