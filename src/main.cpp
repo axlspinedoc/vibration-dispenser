@@ -49,6 +49,10 @@ int weight=1000;
 int read_weight;
 int new_weight;
 int progress=0;
+int first_speed=100;
+int second_speed=30;
+int speed_change_percentage=50;
+int speed;
 
 // TODO: Refactor inside screencom class
 // Forward definitions of Screencom
@@ -79,7 +83,7 @@ void setup() {
   if (scale.is_ready())
   {    
     scale.set_scale(SCALE_GRAMS);
-    scale.tare();        
+    scale.tare();
   }else{
     // This should be an Error condition
     Serial.println("Scale not detected");
@@ -128,7 +132,8 @@ void loop() {
         disp_button.reset();
         machine_state.setState(control::State::DISPENSING);        
         Serial.println("State:= DISPENSING"); 
-        setScreen(Screen::DISPENSING);                
+        setScreen(Screen::DISPENSING);
+        speed=first_speed;                    
       }     
       break;
     
@@ -153,6 +158,7 @@ void loop() {
     case control::State::DISPENSING:
       
       disp_button.update();
+      setVibration(speed);
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
       {        
@@ -160,7 +166,15 @@ void loop() {
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
+        if (progress>=speed_change_percentage)
+        {
+          speed=second_speed;
+        }
+        
+
       } else {
+        speed=0;
+        setVibration(speed);
         machine_state.setState(control::State::ERROR);
         Serial.println("State:= ERROR");
         errorScreen("Falla en bascula");        
@@ -180,6 +194,8 @@ void loop() {
       if ((read_weight>=weight) || disp_button.getState())      
       {        
         disp_button.reset();
+        speed=0;
+        setVibration(speed);
         progress=0;
         machine_state.setState(control::State::SERVED);        
         setScreen(Screen::SERVED);
