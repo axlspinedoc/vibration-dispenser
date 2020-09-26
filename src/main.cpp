@@ -73,9 +73,11 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
 
-  if (scale.wait_ready_retry(10,100))
-  {
-    scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
+  
+  //if (scale.wait_ready_retry(20,100))  
+  if (scale.is_ready())  
+  {    
     scale.set_scale(SCALE_GRAMS);
     scale.tare();        
   }else{
@@ -152,10 +154,10 @@ void loop() {
       
       disp_button.update();
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
-      if (scale.wait_ready_retry(3,50))
-      {
-        read_weight = scale.get_units();
-        progress= (int)((float)weight/weight)*100;        
+      if (scale.read() < 8000000)
+      {        
+        read_weight = scale.get_units(2);
+        progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
       } else {
