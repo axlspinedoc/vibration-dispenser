@@ -48,18 +48,19 @@ char incomingChar;
 int weight=1000;
 int read_weight;
 int new_weight;
+int progress=0;
 
 // TODO: Refactor inside screencom class
 // Forward definitions of Screencom
-void setScreen(Screen menu, int old_weight=0, int new_weight=0);
+void setScreen(Screen menu, int old_weight_=0, int new_weight_=0);
 void splashScreen();
 void standbyScreen();
 void dispensingScreen();
 void servedScreen();
 void openDoorScreen();
-void setWeightScreen(int old_weight, int new_weight, int col = 14);
+void setWeightScreen(int old_weight_, int new_weight_, int col = 14);
 void weightConfirmedScreen();
-void errorScreen();
+void errorScreen(String msg);
 int manageWeight(int saved_weight);
 
 // Forward definitions of vibrator
@@ -72,7 +73,7 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
 
-  if (scale.is_ready())
+  if (scale.wait_ready_retry(10,100))
   {
     scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
     scale.set_scale(SCALE_GRAMS);
@@ -151,16 +152,32 @@ void loop() {
       
       disp_button.update();
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
-      read_weight = scale.get_units();
+      if (scale.wait_ready_retry(3,50))
+      {
+        read_weight = scale.get_units();
+        progress= (int)((float)weight/weight)*100;        
+        Serial.print("progreso: ");
+        Serial.println(progress);
+      } else {
+        machine_state.setState(control::State::ERROR);
+        errorScreen("Falla en bascula");
+        break;
+      }
+                  
+      // TODO: Send to Screencom to update weight
       lcd.setCursor(0,1);
-      lcd.print("     ");
+      lcd.print("                ");
       lcd.setCursor(0,1);      
       lcd.print(read_weight);
+      lcd.print("/");
+      lcd.print(weight);
+      lcd.print("g");
       
       
       if ((read_weight>=weight) || disp_button.getState())      
       {        
         disp_button.reset();
+        progress=0;
         machine_state.setState(control::State::SERVED);        
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
@@ -193,7 +210,16 @@ void loop() {
       break;
 
     default: //Unknown State, shouldn't be reachable. Must prompt error.
-        machine_state.setState(control::State::ERROR);     
+        //machine_state.setState(control::State::ERROR);
+        if (interface.getKey()==Key::SELECT)
+        {
+          incomingChar='.';
+          interface.resetKeys();
+          machine_state.setState(control::State::STANDBY);
+          setScreen(Screen::STANDBY);
+          break;
+        }
+             
       break;
     }  
 }
@@ -201,7 +227,7 @@ void loop() {
 //---------------------------------FUNCTIONS------------------------------------
 
 
-void setScreen(Screen menu, int old_weight, int new_weight){
+void setScreen(Screen menu, int old_weight_, int new_weight){
   if (menu!=Screen::SETWEIGHT)
   {
     lcd.noBlink();
@@ -216,7 +242,7 @@ void setScreen(Screen menu, int old_weight, int new_weight){
     standbyScreen();
     break;
   case Screen::SETWEIGHT:
-    setWeightScreen(old_weight,new_weight);
+    setWeightScreen(old_weight_,new_weight);
     break;
   case Screen::DISPENSING:
     dispensingScreen();
@@ -228,7 +254,7 @@ void setScreen(Screen menu, int old_weight, int new_weight){
     openDoorScreen();
     break;
   case Screen::ERRORSCREEN:
-    errorScreen();
+    //errorScreen();
     break;
   
   default:
@@ -247,9 +273,11 @@ void splashScreen(){
 void standbyScreen(){  
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Presione D");
+  lcd.print(" Oprima 1 para  ");
   lcd.setCursor(0,1);
-  lcd.print("para dispensar");
+  lcd.print(" surtir ");
+  lcd.print(weight);
+  lcd.print("g");
 }
 void dispensingScreen(){
   lcd.clear();
@@ -267,7 +295,7 @@ void openDoorScreen(){
   lcd.setCursor(0,1);
   lcd.print("terminar vaciado");
 }
-void setWeightScreen(int old_weight, int new_weight, int col){
+void setWeightScreen(int old_weight_, int new_weight_, int col){
   lcd.clear();
   lcd.print("Peso prog.");
   lcd.setCursor(0,1);
@@ -277,30 +305,30 @@ void setWeightScreen(int old_weight, int new_weight, int col){
   lcd.setCursor(15,1);
   lcd.print("g");
   
-  if (new_weight<10)
+  if (new_weight_<10)
   {        
     lcd.setCursor(14,1);
-  }else if(new_weight<100){    
+  }else if(new_weight_<100){    
     lcd.setCursor(13,1);
-  }else if (new_weight<1000){
+  }else if (new_weight_<1000){
     lcd.setCursor(12,1);
   } else {
     lcd.setCursor(11,1);
   }
-  lcd.print(new_weight);
+  lcd.print(new_weight_);
   
 
-  if (old_weight<10)
+  if (old_weight_<10)
   {        
     lcd.setCursor(14,0);
-  }else if(old_weight<100){    
+  }else if(old_weight_<100){    
     lcd.setCursor(13,0);
-  }else if (old_weight<1000){
+  }else if (old_weight_<1000){
     lcd.setCursor(12,0);
   } else {
     lcd.setCursor(11,0);
   }
-  lcd.print(old_weight);
+  lcd.print(old_weight_);
   
   lcd.setCursor(col,1);
   lcd.blink();
@@ -377,8 +405,12 @@ void setVibration(int percentage){
   analogWrite(VIBRATOR_PIN,pwm);
 }
 
-void errorScreen(){
+void errorScreen(String msg){
   //TO DO: Define Error codes and screen
+  lcd.clear();
+  lcd.print(msg);
+  lcd.setCursor(0,1);
+  lcd.print("Presione Select");
 }
 
 //------------------------------END OF PROGRAM----------------------------------
