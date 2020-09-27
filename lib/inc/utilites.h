@@ -4,8 +4,8 @@
 
 // Pinout definition
 #define KEYPAD_PIN          A0
-#define DOOR_BUTTON_PIN     30
-#define DISPENSE_BUTTON_PIN 31
+#define DOOR_BUTTON_PIN     29
+#define DISPENSE_BUTTON_PIN 37
 #define SERVO_PIN           44
 
 #define pin_RS              8
@@ -16,8 +16,8 @@
 #define pin_d7              7
 #define pin_BL              10
 
-#define LOADCELL_DOUT_PIN   52
-#define LOADCELL_SCK_PIN    53
+#define LOADCELL_DOUT_PIN   53
+#define LOADCELL_SCK_PIN    51
 
 // LCD definition 
 #define LCD_COL             16
