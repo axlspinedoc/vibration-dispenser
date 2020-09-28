@@ -49,8 +49,8 @@ int weight=1000;
 int read_weight;
 int new_weight;
 int progress=0;
-int first_speed=100;
-int second_speed=30;
+int first_speed=105;
+int second_speed=90;
 int speed_change_percentage=50;
 int speed;
 
@@ -133,7 +133,8 @@ void loop() {
         machine_state.setState(control::State::DISPENSING);        
         Serial.println("State:= DISPENSING"); 
         setScreen(Screen::DISPENSING);
-        speed=first_speed;                    
+        speed=first_speed;
+        digitalWrite(RELAY1,HIGH);                    
       }     
       break;
     
@@ -162,11 +163,12 @@ void loop() {
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
       {        
-        read_weight = scale.get_units(2);
+        read_weight = scale.get_units();
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
-        if (progress>=speed_change_percentage)
+        
+        if (progress>=speed_change_percentage || (weight<=100))
         {
           speed=second_speed;
         }
@@ -177,7 +179,8 @@ void loop() {
         setVibration(speed);
         machine_state.setState(control::State::ERROR);
         Serial.println("State:= ERROR");
-        errorScreen("Falla en bascula");        
+        errorScreen("Falla en bascula");
+        digitalWrite(RELAY1,LOW);        
         break;
       }
                   
@@ -200,6 +203,7 @@ void loop() {
         machine_state.setState(control::State::SERVED);        
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
+        digitalWrite(RELAY1,LOW);
       }
       break;  
 
@@ -304,13 +308,13 @@ void dispensingScreen(){
 }
 void servedScreen(){
   lcd.clear();
-  lcd.print("Presione F para");   
+  lcd.print("Presione 2 para");   
   lcd.setCursor(0,1);
   lcd.print("vaciar tolva");
 }
 void openDoorScreen(){
   lcd.clear();
-  lcd.print("Presione R para"); 
+  lcd.print("Presione 2 para"); 
   lcd.setCursor(0,1);
   lcd.print("terminar vaciado");
 }
@@ -420,8 +424,9 @@ void weightConfirmedScreen(){
 }
 
 void setVibration(int percentage){
-  int pwm=map(percentage,0,100,0,255);
-  analogWrite(VIBRATOR_PIN,pwm);
+  //int pwm=map(percentage,0,100,0,255);
+  //analogWrite(VIBRATOR_PIN,pwm);
+  analogWrite(VIBRATOR_PIN,percentage);
 }
 
 void errorScreen(String msg){

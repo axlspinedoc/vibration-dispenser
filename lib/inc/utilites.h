@@ -6,7 +6,7 @@
 #define KEYPAD_PIN          A0
 #define DOOR_BUTTON_PIN     29
 #define DISPENSE_BUTTON_PIN 37
-#define SERVO_PIN           44
+#define SERVO_PIN           2
 
 #define pin_RS              8
 #define pin_EN              9
@@ -25,7 +25,7 @@
 
 // Servo positions
 #define DOOR_CLOSED         0
-#define DOOR_OPEN           45
+#define DOOR_OPEN           90
 // Scale definition
 #define SCALE_GRAMS         257
 
@@ -37,10 +37,10 @@
 #define SELECT_VALUE        800
 
 // Vibrator output pin
-#define VIBRATOR_PIN        45
+#define VIBRATOR_PIN        3
 
 // Relays
-#define RELAY1              38
+#define RELAY1              46
 
 // namespace vibration_dispenser definition
 namespace vibration_dispenser{} 
