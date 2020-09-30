@@ -517,6 +517,46 @@ void setWeightScreen(int old_weight_, int new_weight_, int col){
   lcd.blink();
 }
 
+// TODO: Change to Speed
+// void setSpeedScreen(int old_weight_, int new_weight_, int col){
+//   lcd.clear();
+//   lcd.print("Peso prog.");
+//   lcd.setCursor(0,1);
+//   lcd.print("Nuevo peso");
+//   lcd.setCursor(15,0);
+//   lcd.print("g");
+//   lcd.setCursor(15,1);
+//   lcd.print("g");
+  
+//   if (new_weight_<10)
+//   {        
+//     lcd.setCursor(14,1);
+//   }else if(new_weight_<100){    
+//     lcd.setCursor(13,1);
+//   }else if (new_weight_<1000){
+//     lcd.setCursor(12,1);
+//   } else {
+//     lcd.setCursor(11,1);
+//   }
+//   lcd.print(new_weight_);
+  
+
+//   if (old_weight_<10)
+//   {        
+//     lcd.setCursor(14,0);
+//   }else if(old_weight_<100){    
+//     lcd.setCursor(13,0);
+//   }else if (old_weight_<1000){
+//     lcd.setCursor(12,0);
+//   } else {
+//     lcd.setCursor(11,0);
+//   }
+//   lcd.print(old_weight_);
+  
+//   lcd.setCursor(col,1);
+//   lcd.blink();
+//}
+
 // Manages weight change screen. Allows user to change desired weight digit by
 // digit.
 int manageWeight(int saved_weight){
@@ -573,6 +613,62 @@ int manageWeight(int saved_weight){
     interface.resetKeys();
     return set_weight;       
 }
+// Manages speed change screen. Allows user to change desired weight digit by
+// digit.
+int manageSpeed(int saved_speed){
+    
+    int set_speed=saved_speed;
+    int col=14;
+    int increments[3] = {1,10,100};    
+    
+    while (interface.getKey()!=Key::SELECT)
+    {
+        switch (interface.getKey())
+        {
+        case Key::RIGHT:              
+            interface.resetKeys();                    
+                if (col<14)
+                {            
+                    ++col;
+                    lcd.setCursor(col,1);
+                }        
+            break;
+        case Key::UP:              
+            interface.resetKeys();        
+            Serial.println("UP");
+            set_speed += increments[14-col];
+            if (set_speed>=255)
+            {
+                set_speed=255;
+            }                        
+            setWeightScreen(saved_speed,set_speed,col);
+            break;
+        case Key::DOWN:              
+            interface.resetKeys();        
+            Serial.println("DOWN");
+            set_speed -= increments[14-col];
+            if (set_speed<=0)
+            {
+                set_speed=0;
+            }                        
+            setWeightScreen(saved_speed,set_speed,col);
+            break;
+        case Key::LEFT:        
+            interface.resetKeys();                            
+                if (col>12)
+                {            
+                    --col;
+                    lcd.setCursor(col,1);
+                }
+            break;        
+        
+        default:        
+            break;
+            }    
+        }
+    interface.resetKeys();
+    return set_speed;       
+}
 
 void weightConfirmedScreen(){
     lcd.clear();
@@ -581,6 +677,15 @@ void weightConfirmedScreen(){
     lcd.setCursor(0,1);
     lcd.print("| exitosamente |");
     delay(1500);
+}
+
+void speedConfirmedScreen(){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("|Vel.  cambiada|");
+  lcd.setCursor(0,1);
+  lcd.print("| exitosamente |");
+  delay(1500);
 }
 
 void standbyMenus(int menu_num){
