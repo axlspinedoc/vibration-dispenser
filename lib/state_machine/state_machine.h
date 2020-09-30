@@ -23,11 +23,15 @@ namespace vibration_dispenser { namespace control {
 // ENUMS -----------------------------------------------------------------------
 enum class State{
   STANDBY=0,
-  SETGRAMS=1,
-  DISPENSING=2,
-  SERVED=3,
-  FLUSH=4,
-  ERROR=5
+  SETGRAMS,
+  TARE,
+  SETSPEED1,
+  SETSPEED2,
+  SETSPEEDCHANGE,
+  DISPENSING,
+  SERVED,
+  FLUSH,
+  ERROR
 };
 
 // STRUCTS ---------------------------------------------------------------------

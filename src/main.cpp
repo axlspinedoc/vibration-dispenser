@@ -35,6 +35,10 @@ LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 enum class Screen{
     SPLASH=0,
     STANDBY,
+    TARE,
+    SETSPEED1,
+    SETSPEED2,
+    SETSPEEDCHANGE,
     DISPENSING,
     SERVED,
     OPENDOOR,
@@ -53,6 +57,7 @@ int first_speed=105;
 int second_speed=90;
 int speed_change_percentage=50;
 int speed;
+int menu=0;
 
 // TODO: Refactor inside screencom class
 // Forward definitions of Screencom
@@ -119,15 +124,78 @@ void loop() {
     case control::State::STANDBY:
       disp_button.update();
       
-      if (incomingChar=='W' || interface.getKey()==Key::SELECT)
-      {
-        interface.resetKeys();
-        machine_state.setState(control::State::SETGRAMS);
-        Serial.println("State:= SETGRAMS");
-        setScreen(Screen::SETWEIGHT,weight,weight);
+      // if (incomingChar=='W' || interface.getKey()==Key::SELECT)
+      // {
+      //   interface.resetKeys();
+      //   machine_state.setState(control::State::SETGRAMS);
+      //   Serial.println("State:= SETGRAMS");
+      //   setScreen(Screen::SETWEIGHT,weight,weight);
         
-      }
+      // }
 
+      //Menu scroller            
+      switch (interface.getKey())
+      {
+      case Key::UP:
+        interface.resetKeys();
+        if (menu==5)
+        {
+          menu=0;
+        }else
+        {
+          ++menu;                  
+        }                
+        break;
+      case Key::DOWN:
+        interface.resetKeys();
+        if (menu==0)
+        {
+          menu=5;
+        }else{
+        --menu;        
+        }
+        break;
+      
+      case Key::SELECT:
+        if (menu!=0)
+        {
+          switch (menu)
+          {
+          case 1:
+            machine_state.setState(control::State::TARE);
+            Serial.println("State:= TARE");
+            break;
+          case 2:
+            machine_state.setState(control::State::SETGRAMS);
+            Serial.println("State:= SETGRAMS");
+            setScreen(Screen::SETWEIGHT,weight,weight);
+            break;
+          case 3:
+            machine_state.setState(control::State::SETSPEED1);
+            Serial.println("State:= SETSPEED1");
+            setScreen(Screen::SETSPEED1);
+            break;
+          case 4:
+            machine_state.setState(control::State::SETSPEED2);
+            Serial.println("State:= SETSPEED2");
+            setScreen(Screen::SETSPEED2);
+            break;
+          case 5:
+            machine_state.setState(control::State::SETSPEEDCHANGE);
+            Serial.println("State:= SETSPEEDCHANGE");
+            setScreen(Screen::SETSPEEDCHANGE);
+            break;
+          
+          default:
+            break;
+          }
+        }        
+        break;
+      
+      default:
+        break;
+      }
+      
       if(incomingChar=='D' || disp_button.getState()){
         disp_button.reset();
         machine_state.setState(control::State::DISPENSING);        
@@ -136,6 +204,17 @@ void loop() {
         speed=first_speed;
         digitalWrite(RELAY1,HIGH);                    
       }     
+      break;
+    
+    case control::State::TARE:      
+      scale.tare();
+      lcd.clear();
+      lcd.print("| Bascula en 0 |");
+      delay(1000);
+      menu=0;
+      machine_state.setState(control::State::STANDBY);
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
       break;
     
     case control::State::SETGRAMS:
@@ -150,10 +229,22 @@ void loop() {
           
       if (incomingChar=='Q')
       {        
+        incomingChar=='.';
         machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
         setScreen(Screen::STANDBY);
+        menu=0;
       }
+      break;
+
+    case control::State::SETSPEED1:
+      // TODO
+      break;
+    case control::State::SETSPEED2:
+      // TODO
+      break;
+    case control::State::SETSPEEDCHANGE:
+      // TODO
       break;
 
     case control::State::DISPENSING:
@@ -163,7 +254,8 @@ void loop() {
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
       {        
-        read_weight = scale.get_units();
+        //Client reported scale was too sensible, averaging will help stabilize
+        read_weight = scale.get_units(2);                                         
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
@@ -200,28 +292,55 @@ void loop() {
         speed=0;
         setVibration(speed);
         progress=0;
-        machine_state.setState(control::State::SERVED);        
+        //machine_state.setState(control::State::SERVED);        
+        
+        // Change: SERVED Screen now shows quantity dispensed
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
         digitalWrite(RELAY1,LOW);
+        
+        // From here, we will delay 2s and jump right into FLUSH
+        delay(2000);
+        machine_state.setState(control::State::FLUSH);        
+        door_servo.write(DOOR_OPEN);      
+        setScreen(Screen::OPENDOOR);
+
       }
       break;  
 
     case control::State::SERVED:
-      door_button.update();             
-      if (incomingChar=='F' || door_button.getState())
-      {        
-        door_button.reset();
+        
+        // In case we arrive here by accident, jump to FLUSH        
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
-        setScreen(Screen::OPENDOOR); 
-        Serial.println("State:= FLUSH");
-      }
+        setScreen(Screen::OPENDOOR);
+      // door_button.update();             
+      // if (incomingChar=='F' || door_button.getState())
+      // {        
+      //   door_button.reset();
+      //   machine_state.setState(control::State::FLUSH);        
+      //   door_servo.write(DOOR_OPEN);      
+      //   setScreen(Screen::OPENDOOR); 
+      //   Serial.println("State:= FLUSH");
+      // }
       break;
 
     case control::State::FLUSH:      
       door_button.update();
-      if (incomingChar=='R' || door_button.getState())
+      read_weight = scale.get_units(2);
+      // Show weight as it falls down to 0
+      // First erase bottom row
+      lcd.setCursor(0,1);
+      lcd.print("                ");
+      // Show how weight comes down to 0
+      lcd.setCursor(4,1);
+      lcd.print(read_weight);
+      lcd.print(" g");
+      
+      //if (incomingChar=='R' || door_button.getState())
+      
+      // we leave door_button enabled in case door gets stuck open
+      if ((read_weight < 5) || door_button.getState())
       {        
         door_button.reset();
         machine_state.setState(control::State::STANDBY);        
@@ -264,6 +383,23 @@ void setScreen(Screen menu, int old_weight_, int new_weight){
   case Screen::STANDBY:
     standbyScreen();
     break;
+  
+  case Screen::TARE:
+    standbyScreen();
+  break;
+  
+  case Screen::SETSPEED1:
+    standbyScreen();
+  break;
+  
+  case Screen::SETSPEED2:
+    standbyScreen();
+  break;
+
+  case Screen::SETSPEEDCHANGE:
+    standbyScreen();
+  break;
+
   case Screen::SETWEIGHT:
     setWeightScreen(old_weight_,new_weight);
     break;
@@ -308,15 +444,18 @@ void dispensingScreen(){
 }
 void servedScreen(){
   lcd.clear();
-  lcd.print("Presione 2 para");   
-  lcd.setCursor(0,1);
-  lcd.print("vaciar tolva");
+  lcd.print("   Dispensado   ");   
+  // screen mockup:
+  // |   Dispensado   |
+  // |     1000 g     |
+  lcd.setCursor(4,1);
+  lcd.print(scale.get_units(5));
+  lcd.print(" g");
 }
 void openDoorScreen(){
   lcd.clear();
-  lcd.print("Presione 2 para"); 
-  lcd.setCursor(0,1);
-  lcd.print("terminar vaciado");
+  // Only print static text on first row  
+  lcd.print("   Vaciando...  "); 
 }
 void setWeightScreen(int old_weight_, int new_weight_, int col){
   lcd.clear();
