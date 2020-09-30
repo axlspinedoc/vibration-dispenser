@@ -71,6 +71,7 @@ void setWeightScreen(int old_weight_, int new_weight_, int col = 14);
 void weightConfirmedScreen();
 void errorScreen(String msg);
 int manageWeight(int saved_weight);
+void standbyMenus(int menu_num);
 
 // Forward definitions of vibrator
 void setVibration(int percentage);
@@ -141,9 +142,11 @@ void loop() {
         if (menu==5)
         {
           menu=0;
+          standbyMenus(menu);
         }else
         {
-          ++menu;                  
+          ++menu;
+          standbyMenus(menu);                  
         }                
         break;
       case Key::DOWN:
@@ -151,8 +154,10 @@ void loop() {
         if (menu==0)
         {
           menu=5;
+          standbyMenus(menu);
         }else{
-        --menu;        
+          --menu;
+          standbyMenus(menu);        
         }
         break;
       
@@ -162,25 +167,30 @@ void loop() {
           switch (menu)
           {
           case 1:
+            interface.resetKeys();
             machine_state.setState(control::State::TARE);
             Serial.println("State:= TARE");
             break;
           case 2:
+            interface.resetKeys();
             machine_state.setState(control::State::SETGRAMS);
             Serial.println("State:= SETGRAMS");
             setScreen(Screen::SETWEIGHT,weight,weight);
             break;
           case 3:
+            interface.resetKeys();
             machine_state.setState(control::State::SETSPEED1);
             Serial.println("State:= SETSPEED1");
             setScreen(Screen::SETSPEED1);
             break;
           case 4:
+            interface.resetKeys();
             machine_state.setState(control::State::SETSPEED2);
             Serial.println("State:= SETSPEED2");
             setScreen(Screen::SETSPEED2);
             break;
           case 5:
+            interface.resetKeys();
             machine_state.setState(control::State::SETSPEEDCHANGE);
             Serial.println("State:= SETSPEEDCHANGE");
             setScreen(Screen::SETSPEEDCHANGE);
@@ -229,7 +239,7 @@ void loop() {
           
       if (incomingChar=='Q')
       {        
-        incomingChar=='.';
+        incomingChar='.';
         machine_state.setState(control::State::STANDBY);
         Serial.println("State:= STANDBY");
         setScreen(Screen::STANDBY);
@@ -239,12 +249,22 @@ void loop() {
 
     case control::State::SETSPEED1:
       // TODO
+      machine_state.setState(control::State::STANDBY);
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
+      menu=0;
       break;
     case control::State::SETSPEED2:
       // TODO
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
+      menu=0;
       break;
     case control::State::SETSPEEDCHANGE:
       // TODO
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
+      menu=0;
       break;
 
     case control::State::DISPENSING:
@@ -347,6 +367,7 @@ void loop() {
         door_servo.write(DOOR_CLOSED);
         setScreen(Screen::STANDBY);
         Serial.println("State:= STANDBY");
+        menu=0;
       }
       
       break;
@@ -560,6 +581,50 @@ void weightConfirmedScreen(){
     lcd.setCursor(0,1);
     lcd.print("| exitosamente |");
     delay(1500);
+}
+
+void standbyMenus(int menu_num){
+  lcd.clear();
+  switch (menu_num)
+  {
+  case 0:
+    //STANDBY
+    standbyScreen();
+    break;  
+  case 1:
+    //TARE
+    lcd.print("Presione SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("  para tarear  ");
+    break;
+  case 2:
+    //SETGRAMS
+    lcd.print("Presione SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("config peso");
+    break;
+  case 3:
+    //SETSPEED1
+    lcd.print("Presione SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("config vel1");
+    break;
+  case 4:
+    //SETSPEED2
+    lcd.print("Presione SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("config vel2");
+    break;
+  case 5:
+    //SETSPEEDCHANGE
+    lcd.print("Presione SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("cambio vel");
+    break;
+  
+  default:
+    break;
+  }
 }
 
 void setVibration(int percentage){
