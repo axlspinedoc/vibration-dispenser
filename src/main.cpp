@@ -53,8 +53,12 @@ int weight=1000;
 int read_weight;
 int new_weight;
 int progress=0;
+
+int new_first_speed;
 int first_speed=105;
+int new_second_speed;
 int second_speed=90;
+int new_speed_change_percentage;
 int speed_change_percentage=50;
 int speed;
 int menu=0;
@@ -68,9 +72,11 @@ void dispensingScreen();
 void servedScreen();
 void openDoorScreen();
 void setWeightScreen(int old_weight_, int new_weight_, int col = 14);
-void weightConfirmedScreen();
+void setSpeedScreen(int old_value_,int new_value_, int col = 14);
+void changeConfirmedScreen();
 void errorScreen(String msg);
 int manageWeight(int saved_weight);
+int manageSpeed(int saved_speed);
 void standbyMenus(int menu_num);
 
 // Forward definitions of vibrator
@@ -181,19 +187,19 @@ void loop() {
             interface.resetKeys();
             machine_state.setState(control::State::SETSPEED1);
             Serial.println("State:= SETSPEED1");
-            setScreen(Screen::SETSPEED1);
+            setScreen(Screen::SETSPEED1,first_speed,first_speed);
             break;
           case 4:
             interface.resetKeys();
             machine_state.setState(control::State::SETSPEED2);
             Serial.println("State:= SETSPEED2");
-            setScreen(Screen::SETSPEED2);
+            setScreen(Screen::SETSPEED1,second_speed,second_speed);
             break;
           case 5:
             interface.resetKeys();
             machine_state.setState(control::State::SETSPEEDCHANGE);
             Serial.println("State:= SETSPEEDCHANGE");
-            setScreen(Screen::SETSPEEDCHANGE);
+            setScreen(Screen::SETSPEED1,speed_change_percentage,speed_change_percentage);
             break;
           
           default:
@@ -234,7 +240,7 @@ void loop() {
       if (new_weight!=weight)
       {
           weight=new_weight;
-          weightConfirmedScreen();
+          changeConfirmedScreen();
       }            
           
       if (incomingChar=='Q')
@@ -248,20 +254,40 @@ void loop() {
       break;
 
     case control::State::SETSPEED1:
-      // TODO
+      
+      new_first_speed=manageSpeed(first_speed);      
+      if (new_first_speed!=first_speed)
+      {
+          first_speed=new_first_speed;          
+          changeConfirmedScreen();
+      }
+
       machine_state.setState(control::State::STANDBY);
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
       menu=0;
       break;
     case control::State::SETSPEED2:
-      // TODO
+      
+      new_second_speed=manageSpeed(second_speed);      
+      if (new_second_speed!=second_speed)
+      {
+          second_speed=new_second_speed;          
+          changeConfirmedScreen();
+      }
+      
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
       menu=0;
       break;
     case control::State::SETSPEEDCHANGE:
-      // TODO
+      
+      new_speed_change_percentage=manageSpeed(speed_change_percentage);      
+      if (new_speed_change_percentage!=speed_change_percentage)
+      {
+          speed_change_percentage=new_speed_change_percentage;          
+          changeConfirmedScreen();
+      }
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
       menu=0;
@@ -390,7 +416,7 @@ void loop() {
 //---------------------------------FUNCTIONS------------------------------------
 
 
-void setScreen(Screen menu, int old_weight_, int new_weight){
+void setScreen(Screen menu, int old_value_, int new_value_){
   if (menu!=Screen::SETWEIGHT)
   {
     lcd.noBlink();
@@ -403,26 +429,14 @@ void setScreen(Screen menu, int old_weight_, int new_weight){
     break;
   case Screen::STANDBY:
     standbyScreen();
-    break;
-  
-  case Screen::TARE:
-    standbyScreen();
-  break;
+    break;    
   
   case Screen::SETSPEED1:
-    standbyScreen();
+    setSpeedScreen(old_value_,new_value_);    
   break;
   
-  case Screen::SETSPEED2:
-    standbyScreen();
-  break;
-
-  case Screen::SETSPEEDCHANGE:
-    standbyScreen();
-  break;
-
   case Screen::SETWEIGHT:
-    setWeightScreen(old_weight_,new_weight);
+    setWeightScreen(old_value_,new_value_);
     break;
   case Screen::DISPENSING:
     dispensingScreen();
@@ -518,44 +532,44 @@ void setWeightScreen(int old_weight_, int new_weight_, int col){
 }
 
 // TODO: Change to Speed
-// void setSpeedScreen(int old_weight_, int new_weight_, int col){
-//   lcd.clear();
-//   lcd.print("Peso prog.");
-//   lcd.setCursor(0,1);
-//   lcd.print("Nuevo peso");
-//   lcd.setCursor(15,0);
-//   lcd.print("g");
-//   lcd.setCursor(15,1);
-//   lcd.print("g");
+void setSpeedScreen(int old_speed_, int new_speed_, int col){
+  lcd.clear();
+  lcd.print("Peso prog.");
+  lcd.setCursor(0,1);
+  lcd.print("Nuevo peso");
+  lcd.setCursor(15,0);
+  lcd.print("g");
+  lcd.setCursor(15,1);
+  lcd.print("g");
   
-//   if (new_weight_<10)
-//   {        
-//     lcd.setCursor(14,1);
-//   }else if(new_weight_<100){    
-//     lcd.setCursor(13,1);
-//   }else if (new_weight_<1000){
-//     lcd.setCursor(12,1);
-//   } else {
-//     lcd.setCursor(11,1);
-//   }
-//   lcd.print(new_weight_);
+  if (new_speed_<10)
+  {        
+    lcd.setCursor(14,1);
+  }else if(new_speed_<100){    
+    lcd.setCursor(13,1);
+  }else if (new_speed_<1000){
+    lcd.setCursor(12,1);
+  } else {
+    lcd.setCursor(11,1);
+  }
+  lcd.print(new_speed_);
   
 
-//   if (old_weight_<10)
-//   {        
-//     lcd.setCursor(14,0);
-//   }else if(old_weight_<100){    
-//     lcd.setCursor(13,0);
-//   }else if (old_weight_<1000){
-//     lcd.setCursor(12,0);
-//   } else {
-//     lcd.setCursor(11,0);
-//   }
-//   lcd.print(old_weight_);
+  if (old_speed_<10)
+  {        
+    lcd.setCursor(14,0);
+  }else if(old_speed_<100){    
+    lcd.setCursor(13,0);
+  }else if (old_speed_<1000){
+    lcd.setCursor(12,0);
+  } else {
+    lcd.setCursor(11,0);
+  }
+  lcd.print(old_speed_);
   
-//   lcd.setCursor(col,1);
-//   lcd.blink();
-//}
+  lcd.setCursor(col,1);
+  lcd.blink();
+}
 
 // Manages weight change screen. Allows user to change desired weight digit by
 // digit.
@@ -641,7 +655,7 @@ int manageSpeed(int saved_speed){
             {
                 set_speed=255;
             }                        
-            setWeightScreen(saved_speed,set_speed,col);
+            setSpeedScreen(saved_speed,set_speed,col);
             break;
         case Key::DOWN:              
             interface.resetKeys();        
@@ -651,7 +665,7 @@ int manageSpeed(int saved_speed){
             {
                 set_speed=0;
             }                        
-            setWeightScreen(saved_speed,set_speed,col);
+            setSpeedScreen(saved_speed,set_speed,col);
             break;
         case Key::LEFT:        
             interface.resetKeys();                            
@@ -670,22 +684,13 @@ int manageSpeed(int saved_speed){
     return set_speed;       
 }
 
-void weightConfirmedScreen(){
+void changeConfirmedScreen(){
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print("|Peso  cambiado|");
+    lcd.print("|Valor cambiado|");
     lcd.setCursor(0,1);
     lcd.print("| exitosamente |");
     delay(1500);
-}
-
-void speedConfirmedScreen(){
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("|Vel.  cambiada|");
-  lcd.setCursor(0,1);
-  lcd.print("| exitosamente |");
-  delay(1500);
 }
 
 void standbyMenus(int menu_num){
