@@ -49,17 +49,17 @@ enum class Screen{
 // TODO: Refactor inside Serial_Debug class
 // Serial comm DEBUGGING
 char incomingChar;
-int weight=1000;
+int weight=PESO_DEFAULT;
 int read_weight;
 int new_weight;
 int progress=0;
 
 int new_first_speed;
-int first_speed=105;
+int first_speed=VEL1;
 int new_second_speed;
-int second_speed=90;
+int second_speed=VEL2;
 int new_speed_change_percentage;
-int speed_change_percentage=50;
+int speed_change_percentage=CAMBIO_VELOCIDAD;
 int speed;
 int menu=0;
 
@@ -214,11 +214,13 @@ void loop() {
       
       if(incomingChar=='D' || disp_button.getState()){
         disp_button.reset();
+        incomingChar='.';
         machine_state.setState(control::State::DISPENSING);        
         Serial.println("State:= DISPENSING"); 
         setScreen(Screen::DISPENSING);
         speed=first_speed;
-        digitalWrite(RELAY1,HIGH);                    
+        Serial.print("Speed:= ");
+        Serial.println(speed);                            
       }     
       break;
     
@@ -228,6 +230,7 @@ void loop() {
       lcd.print("| Bascula en 0 |");
       delay(1000);
       menu=0;
+      standbyMenus(menu);
       machine_state.setState(control::State::STANDBY);
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
@@ -235,22 +238,18 @@ void loop() {
     
     case control::State::SETGRAMS:
 
-      new_weight=manageWeight(weight);
-      incomingChar='Q'; // Forces exit of state
+      new_weight=manageWeight(weight);      
       if (new_weight!=weight)
       {
           weight=new_weight;
           changeConfirmedScreen();
+          Serial.println(weight);
       }            
-          
-      if (incomingChar=='Q')
-      {        
-        incomingChar='.';
-        machine_state.setState(control::State::STANDBY);
-        Serial.println("State:= STANDBY");
-        setScreen(Screen::STANDBY);
-        menu=0;
-      }
+      machine_state.setState(control::State::STANDBY);
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
+      menu=0;
+
       break;
 
     case control::State::SETSPEED1:
@@ -260,13 +259,16 @@ void loop() {
       {
           first_speed=new_first_speed;          
           changeConfirmedScreen();
+          Serial.println(first_speed);
       }
 
+      menu=0;
+      standbyMenus(menu);
       machine_state.setState(control::State::STANDBY);
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
-      menu=0;
       break;
+
     case control::State::SETSPEED2:
       
       new_second_speed=manageSpeed(second_speed);      
@@ -274,12 +276,16 @@ void loop() {
       {
           second_speed=new_second_speed;          
           changeConfirmedScreen();
+          Serial.println(second_speed);
       }
       
+      menu=0;
+      standbyMenus(menu);
+      machine_state.setState(control::State::STANDBY);
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
-      menu=0;
       break;
+
     case control::State::SETSPEEDCHANGE:
       
       new_speed_change_percentage=manageSpeed(speed_change_percentage);      
@@ -287,10 +293,13 @@ void loop() {
       {
           speed_change_percentage=new_speed_change_percentage;          
           changeConfirmedScreen();
+          Serial.println(speed_change_percentage);
       }
+      menu=0;
+      standbyMenus(menu);
+      machine_state.setState(control::State::STANDBY);
       Serial.println("State:= STANDBY");
       setScreen(Screen::STANDBY);
-      menu=0;
       break;
 
     case control::State::DISPENSING:
@@ -309,6 +318,8 @@ void loop() {
         if (progress>=speed_change_percentage || (weight<=100))
         {
           speed=second_speed;
+          Serial.print("Speed:=");
+          Serial.println(speed);
         }
         
 
@@ -343,10 +354,10 @@ void loop() {
         // Change: SERVED Screen now shows quantity dispensed
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
-        digitalWrite(RELAY1,LOW);
         
         // From here, we will delay 2s and jump right into FLUSH
         delay(2000);
+        digitalWrite(RELAY1,HIGH);        
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
@@ -386,8 +397,9 @@ void loop() {
       //if (incomingChar=='R' || door_button.getState())
       
       // we leave door_button enabled in case door gets stuck open
-      if ((read_weight < 5) || door_button.getState())
+      if ((read_weight < 15) || door_button.getState())
       {        
+        digitalWrite(RELAY1,LOW);
         door_button.reset();
         machine_state.setState(control::State::STANDBY);        
         door_servo.write(DOOR_CLOSED);
@@ -403,6 +415,7 @@ void loop() {
         if (interface.getKey()==Key::SELECT)
         {
           incomingChar='.';
+          digitalWrite(RELAY1,LOW);
           interface.resetKeys();
           machine_state.setState(control::State::STANDBY);
           setScreen(Screen::STANDBY);
@@ -460,9 +473,16 @@ void splashScreen(){
   lcd.clear();    
   lcd.setCursor(0,0);  
   lcd.print("Sistema iniciado");
+  lcd.setCursor(11,1);
+  lcd.print("V1.0");
+  delay(500);
+  lcd.clear();    
+  lcd.setCursor(0,0);  
+  lcd.print("|-----IDEA-----|");
   lcd.setCursor(0,1);
-  lcd.print("V0.1");
+  lcd.print("|              |");
   delay(2000);
+
 }
 void standbyScreen(){  
   lcd.clear();
@@ -534,13 +554,9 @@ void setWeightScreen(int old_weight_, int new_weight_, int col){
 // TODO: Change to Speed
 void setSpeedScreen(int old_speed_, int new_speed_, int col){
   lcd.clear();
-  lcd.print("Peso prog.");
+  lcd.print("Vel prog.");
   lcd.setCursor(0,1);
-  lcd.print("Nuevo peso");
-  lcd.setCursor(15,0);
-  lcd.print("g");
-  lcd.setCursor(15,1);
-  lcd.print("g");
+  lcd.print("Nueva Vel");
   
   if (new_speed_<10)
   {        
@@ -703,33 +719,33 @@ void standbyMenus(int menu_num){
     break;  
   case 1:
     //TARE
-    lcd.print("Presione SELECT");
+    lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("  para tarear  ");
+    lcd.print("    para  tarear");
     break;
   case 2:
     //SETGRAMS
-    lcd.print("Presione SELECT");
+    lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("config peso");
+    lcd.print("  config  peso");
     break;
   case 3:
     //SETSPEED1
-    lcd.print("Presione SELECT");
+    lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("config vel1");
+    lcd.print("  config  vel1");
     break;
   case 4:
     //SETSPEED2
-    lcd.print("Presione SELECT");
+    lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("config vel2");
+    lcd.print("  config  vel2");
     break;
   case 5:
     //SETSPEEDCHANGE
-    lcd.print("Presione SELECT");
+    lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("cambio vel");
+    lcd.print("  cambio  vel");
     break;
   
   default:

@@ -2,6 +2,12 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
+// CONFIGURE AQUI
+#define VEL1                250
+#define VEL2                115
+#define CAMBIO_VELOCIDAD    80
+#define PESO_DEFAULT        1000
+
 // Pinout definition
 #define KEYPAD_PIN          A0
 #define DOOR_BUTTON_PIN     29
