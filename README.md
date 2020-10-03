@@ -18,89 +18,47 @@
     <br> 
 </p>
 
-## 📝 Table of Contents
+# 🧐 Acerca del proyecto <a name = "about"></a>
 
-- [Acerca del proyecto](#about)
-- [Deployment](#deployment)
-- [Uso](#usage)
-- [Herramientas](#built_using)
-- [TODO](../TODO.md)
-- [Contributing](../CONTRIBUTING.md)
-- [Autores](#authors)
-- [Agradecimientos](#acknowledgement)
+Este repositorio contiene el código fuente del sistema operativo de una dispensador a granel utilizando un microcontrolador Amega2560
 
-## 🧐 About <a name = "about"></a>
+# 🏁 Preparación necesaria <a name = "getting_started"></a>
 
-Write about 1-2 paragraphs describing the purpose of your project.
+1. Instale la herramienta [VSCode](https://code.visualstudio.com)
 
-## 🏁 Getting Started <a name = "getting_started"></a>
+2. Abra el programa y entre a _File_, _Preferences_, _Extensions_.
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+3. En el buscador, introduzca _C/C++_ e instale la extensión.
 
-### Prerequisites
+4. Nuevamente en el buscador, introduzca ahora _PlatformIO IDE_ e instale.
 
-What things you need to install the software and how to install them.
+5. Una vez instalados correctamente, cada vez que abra VSCode aparecerá la pantalla de inicio con el anuncio "Welcome to PlatformIO"
 
-```
-Give examples
-```
+6. Descargue una copia de este repositorio desde la opción _Code_, _Descargar Zip_. Descomprima en una ubicación conocida.
 
-### Installing
+7. Desde la pestaña de _home_ de PlatformIO, seleccione _import Arduino project_
 
-A step by step series of examples that tell you how to get a development env running.
+# Para realizar Ajustes
 
-Say what the step will be
+Abra el archivo _utilities.h_ dentro de la carpeta _lib/inc_
 
-```
-Give the example
-```
+Desde aquí puede editarse:
 
-And repeat
+1. Velocidad 1 default
+2. Velocidad 2 default
+3. Nivel para cambio de velocidades default
+4. Peso inicial default
 
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo.
-
-## 🔧 Running the tests <a name = "tests"></a>
-
-Explain how to run the automated tests for this system.
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## 🎈 Usage <a name="usage"></a>
-
-Add notes about how to use the system.
-
-## 🚀 Deployment <a name = "deployment"></a>
-
-Add additional notes about how to deploy this on a live system.
-
-## ⛏️ Built Using <a name = "built_using"></a>
+# ⛏️ Built Using <a name = "built_using"></a>
 
 - [Visual Studio Code](https://code.visualstudio.com) - IDE
 - [PlatformIO](https://platformio.org) - Embedded development IDE
-- [Arduino UNO](https://www.arduino.cc) - Prototyping
+- [Arduino Mega](https://www.arduino.cc) - Prototyping
 
-## ✍️ Authors <a name = "authors"></a>
+# ✍️ Authors <a name = "authors"></a>
 
 - [@axlspinedoc](https://github.com/axlspinedoc) - Developer
 
-## 🎉 Acknowledgements <a name = "acknowledgement"></a>
+# 🎉 Acknowledgements <a name = "acknowledgement"></a>
 
 - Amber Macias
