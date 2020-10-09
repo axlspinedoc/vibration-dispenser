@@ -38,6 +38,16 @@ Este repositorio contiene el código fuente del sistema operativo de una dispens
 
 7. Desde la pestaña de _home_ de PlatformIO, seleccione _import Arduino project_
 
+8. El programa cargara el proyecto y actualizará los documentos dependiendo la computadora donde se abra. *Espere 5 minutos*, esto permitirá que esté listo para programar
+
+9. Para verificar que está listo busque el botón _Build_ en la barra inferior azul, marcado con el símbolo de palomilla
+
+10. Si en el panel inferior aparece la instrucción [SUCCESS], está listo para programar. Conecte el Arduino a su computadora con el cable USB
+
+11. Presione el botón _Upload_ en la barra inferior azul, marcado con una flecha hacia la derecha. Este botón está inmediatamente a la derecha del botón con la palomilla.
+
+12. Pasados 15 segundos, el _Arduino_ se habrá reinicializado. ¡Ha actualizado exitosamente su microcontrolador!
+
 # Para realizar Ajustes
 
 Abra el archivo _utilities.h_ dentro de la carpeta _lib/inc_
@@ -48,6 +58,8 @@ Desde aquí puede editarse:
 2. Velocidad 2 default
 3. Nivel para cambio de velocidades default
 4. Peso inicial default
+5. Tiempo de espera cuando termina de vaciarse la Tolva
+6. Selección del modo del relevador
 
 # ⛏️ Built Using <a name = "built_using"></a>
 

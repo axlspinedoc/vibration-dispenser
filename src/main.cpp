@@ -53,6 +53,7 @@ int weight=PESO_DEFAULT;
 int read_weight;
 int new_weight;
 int progress=0;
+int door_delay=TIEMPO_ESPERA*1000;
 
 int new_first_speed;
 int first_speed=VEL1;
@@ -328,8 +329,7 @@ void loop() {
         setVibration(speed);
         machine_state.setState(control::State::ERROR);
         Serial.println("State:= ERROR");
-        errorScreen("Falla en bascula");
-        digitalWrite(RELAY1,LOW);        
+        errorScreen("Falla en bascula");        
         break;
       }
                   
@@ -354,10 +354,24 @@ void loop() {
         // Change: SERVED Screen now shows quantity dispensed
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
-        
+        //Relay activates when served
+        #ifdef MODO_ALARMA
+        digitalWrite(RELAY1,HIGH);        
+        #endif
+
         // From here, we will delay 2s and jump right into FLUSH
         delay(2000);
+
+        #ifdef MODO_ALARMA
+        digitalWrite(RELAY1,LOW);        
+        #endif
+
+        #ifdef MODO_MOTOR
         digitalWrite(RELAY1,HIGH);        
+        #endif
+
+        
+        
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
@@ -399,7 +413,10 @@ void loop() {
       // we leave door_button enabled in case door gets stuck open
       if ((read_weight < 15) || door_button.getState())
       {        
+        delay(door_delay);
+        #ifdef MODO_MOTOR
         digitalWrite(RELAY1,LOW);
+        #endif
         door_button.reset();
         machine_state.setState(control::State::STANDBY);        
         door_servo.write(DOOR_CLOSED);

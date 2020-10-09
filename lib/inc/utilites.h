@@ -7,6 +7,11 @@
 #define VEL2                115
 #define CAMBIO_VELOCIDAD    80
 #define PESO_DEFAULT        1000
+#define TIEMPO_ESPERA       2
+
+// Para seleccionar el modo, remover las diagonales
+#define MODO_ALARMA
+//#define MODO_MOTOR
 
 // Pinout definition
 #define KEYPAD_PIN          A0
