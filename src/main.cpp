@@ -305,7 +305,7 @@ void loop() {
 
     case control::State::DISPENSING:
       
-      disp_button.update();
+      door_button.update();
       setVibration(speed);
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
@@ -342,10 +342,10 @@ void loop() {
       lcd.print(weight);
       lcd.print("g");
       
-      
-      if ((read_weight>=weight) || disp_button.getState())      
+      // Door button used as cancel
+      if ((read_weight>=weight) || door_button.getState())      
       {        
-        disp_button.reset();
+        door_button.reset();
         speed=0;
         setVibration(speed);
         progress=0;
@@ -370,8 +370,6 @@ void loop() {
         digitalWrite(RELAY1,HIGH);        
         #endif
 
-        
-        
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
@@ -408,16 +406,17 @@ void loop() {
       lcd.print(read_weight);
       lcd.print(" g");
       
+      //For debug
       //if (incomingChar=='R' || door_button.getState())
       
       // we leave door_button enabled in case door gets stuck open
       if ((read_weight < 15) || door_button.getState())
       {        
+        door_button.reset();
         delay(door_delay);
         #ifdef MODO_MOTOR
         digitalWrite(RELAY1,LOW);
         #endif
-        door_button.reset();
         machine_state.setState(control::State::STANDBY);        
         door_servo.write(DOOR_CLOSED);
         setScreen(Screen::STANDBY);
@@ -438,7 +437,7 @@ void loop() {
           setScreen(Screen::STANDBY);
           break;
         }
-             
+              
       break;
     }  
 }
@@ -750,19 +749,19 @@ void standbyMenus(int menu_num){
     //SETSPEED1
     lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("  config  vel1");
+    lcd.print("Config  vel. uno");
     break;
   case 4:
     //SETSPEED2
     lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("  config  vel2");
+    lcd.print("Config  vel. dos");
     break;
   case 5:
     //SETSPEEDCHANGE
     lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
-    lcd.print("  cambio  vel");
+    lcd.print(" % p. cambio vel");
     break;
   
   default:

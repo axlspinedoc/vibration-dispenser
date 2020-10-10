@@ -7,11 +7,16 @@
 #define VEL2                115
 #define CAMBIO_VELOCIDAD    80
 #define PESO_DEFAULT        1000
-#define TIEMPO_ESPERA       2
+#define TIEMPO_ESPERA       2       // Segundos después de vaciar tolva
 
-// Para seleccionar el modo, remover las diagonales
+// Para seleccionar el modo del relevador, remover las diagonales y 
+// colocarlas en el modo a desactivar
 #define MODO_ALARMA
 //#define MODO_MOTOR
+
+// Posiciones para servo EN GRADOS
+#define DOOR_CLOSED         0
+#define DOOR_OPEN           -90
 
 // Pinout definition
 #define KEYPAD_PIN          A0
@@ -34,9 +39,6 @@
 #define LCD_COL             16
 #define LCD_ROW             4
 
-// Servo positions
-#define DOOR_CLOSED         0
-#define DOOR_OPEN           90
 // Scale definition
 #define SCALE_GRAMS         257
 
