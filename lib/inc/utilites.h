@@ -15,8 +15,8 @@
 //#define MODO_MOTOR
 
 // Posiciones para servo EN GRADOS
-#define DOOR_CLOSED         0
-#define DOOR_OPEN           -90
+#define DOOR_CLOSED         90
+#define DOOR_OPEN           0
 
 // Pinout definition
 #define KEYPAD_PIN          A0
