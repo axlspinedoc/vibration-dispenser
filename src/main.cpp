@@ -354,17 +354,9 @@ void loop() {
         // Change: SERVED Screen now shows quantity dispensed
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
-        //Relay activates when served
-        #ifdef MODO_ALARMA
-        digitalWrite(RELAY1,HIGH);        
-        #endif
 
         // From here, we will delay 2s and jump right into FLUSH
-        delay(2000);
-
-        #ifdef MODO_ALARMA
-        digitalWrite(RELAY1,LOW);        
-        #endif
+        delay(2000);        
 
         #ifdef MODO_MOTOR
         digitalWrite(RELAY1,HIGH);        
@@ -415,6 +407,12 @@ void loop() {
         door_button.reset();
         delay(door_delay);
         #ifdef MODO_MOTOR
+        digitalWrite(RELAY1,LOW);
+        #endif
+        
+        #ifdef MODO_ALARMA
+        digitalWrite(RELAY1,HIGH);
+        delay(1000);
         digitalWrite(RELAY1,LOW);
         #endif
         machine_state.setState(control::State::STANDBY);        
