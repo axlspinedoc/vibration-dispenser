@@ -60,6 +60,7 @@ Desde aquí puede editarse:
 4. Peso inicial default
 5. Tiempo de espera cuando termina de vaciarse la Tolva
 6. Selección del modo del relevador
+7. Posiciones de la puerta en el estado ABIERTO y CERRADO
 
 # ⛏️ Built Using <a name = "built_using"></a>
 
