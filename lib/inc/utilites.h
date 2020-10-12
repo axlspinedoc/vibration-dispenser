@@ -18,6 +18,14 @@
 #define DOOR_CLOSED         0
 #define DOOR_OPEN           90
 
+// Controla la sensibilidad de la báscula
+// 1 = Lo más sensible      10 = Lo menos sensible
+#define SENSIBILIDAD_DISPENSADO   3
+#define SENSIBILIDAD_VACIADO      4
+
+// Confuración de la báscula para transformar en gramos
+#define SCALE_GRAMS         257
+
 // Pinout definition
 #define KEYPAD_PIN          A0
 #define DOOR_BUTTON_PIN     29
@@ -39,8 +47,6 @@
 #define LCD_COL             16
 #define LCD_ROW             4
 
-// Scale definition
-#define SCALE_GRAMS         257
 
 // Keypad resistor values
 #define RIGHT_VALUE         60

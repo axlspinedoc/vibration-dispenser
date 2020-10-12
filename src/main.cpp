@@ -311,7 +311,7 @@ void loop() {
       if (scale.read() < 8000000)
       {        
         //Client reported scale was too sensible, averaging will help stabilize
-        read_weight = scale.get_units(2);                                         
+        read_weight = scale.get_units(SENSIBILIDAD_DISPENSADO);                                         
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
@@ -388,7 +388,7 @@ void loop() {
 
     case control::State::FLUSH:      
       door_button.update();
-      read_weight = scale.get_units(2);
+      read_weight = scale.get_units(SENSIBILIDAD_VACIADO);
       // Show weight as it falls down to 0
       // First erase bottom row
       lcd.setCursor(0,1);
@@ -518,7 +518,7 @@ void servedScreen(){
   // |   Dispensado   |
   // |     1000 g     |
   lcd.setCursor(4,1);
-  lcd.print(scale.get_units(5));
+  lcd.print(scale.get_units(SENSIBILIDAD_VACIADO));
   lcd.print(" g");
 }
 void openDoorScreen(){
