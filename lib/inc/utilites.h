@@ -24,7 +24,7 @@
 #define SENSIBILIDAD_VACIADO      4
 
 // Confuración de la báscula para transformar en gramos
-#define SCALE_GRAMS         257
+#define SCALE_GRAMS         206
 
 // Pinout definition
 #define KEYPAD_PIN          A0
