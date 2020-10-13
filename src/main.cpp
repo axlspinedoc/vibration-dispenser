@@ -760,6 +760,7 @@ int manageProduct(int saved_product){
         {
         
         case Key::UP:              
+            interface.resetKeys();
             if (set_product==NUM_PRODUCTOS)
             {
               set_product=0;
@@ -769,13 +770,13 @@ int manageProduct(int saved_product){
             lcd.setCursor(0,1);
             lcd.print("                ");
             lcd.setCursor(0,1);                        
-            //TODO: Print current selection        
-            //product_to_show.equals(product_id[%0]);
-            
+            //TODO: Print current selection                    
+            //product_to_show=product_id[set_product];
             lcd.print(set_product);
             
             break;
         case Key::DOWN:              
+            interface.resetKeys();
             if (set_product==0)
             {
               set_product=NUM_PRODUCTOS;
