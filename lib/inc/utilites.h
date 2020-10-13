@@ -14,9 +14,7 @@
 #define UTILITIES_H_
 
 // CONFIGURE AQUI
-#define VEL1                250
-#define VEL2                115
-#define CAMBIO_VELOCIDAD    80
+#define PRODUCTO_INICIAL    0
 #define PESO_DEFAULT        1000
 #define TIEMPO_ESPERA       2       // Segundos después de vaciar tolva
 
@@ -39,7 +37,7 @@
 
 // Pinout definition
 #define KEYPAD_PIN          A0
-#define DOOR_BUTTON_PIN     29
+#define CANCEL_BUTTON_PIN   29
 #define DISPENSE_BUTTON_PIN 37
 #define SERVO_PIN           3
 

@@ -22,7 +22,7 @@
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
-io::Button door_button(DOOR_BUTTON_PIN,100);
+io::Button cancel_button(CANCEL_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
 io::Keypad interface(KEYPAD_PIN);
 
@@ -58,15 +58,15 @@ int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
 
 int new_first_speed;
-int first_speed=VEL1;
 int new_second_speed;
-int second_speed=VEL2;
 int new_speed_change_percentage;
-int speed_change_percentage=CAMBIO_VELOCIDAD;
 int speed;
 int menu=0;
-int product_id=0;
-int new_product_id=0;
+int product_id=PRODUCTO_INICIAL;
+int new_product_id=PRODUCTO_INICIAL;
+int first_speed=product_param[product_id][0];
+int second_speed=product_param[product_id][1];
+int speed_change_percentage=product_param[product_id][2];
 
 // TODO: Refactor inside screencom class
 // Forward definitions of Screencom
@@ -136,7 +136,17 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
-      disp_button.update();      
+      disp_button.update();
+      cancel_button.update();
+      
+      if (cancel_button.getState())
+      {
+        cancel_button.reset();
+        machine_state.setState(control::State::SERVED);
+        lcd.clear();
+        lcd.print("|  Vaciando... |");
+      }
+            
 
       //Menu scroller            
       switch (interface.getKey())
@@ -328,7 +338,7 @@ void loop() {
 
     case control::State::DISPENSING:
       
-      door_button.update();
+      cancel_button.update();
       setVibration(speed);
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
@@ -366,9 +376,9 @@ void loop() {
       lcd.print("g");
       
       // Door button used as cancel
-      if ((read_weight>=weight) || door_button.getState())      
+      if ((read_weight>=weight) || cancel_button.getState())      
       {        
-        door_button.reset();
+        cancel_button.reset();
         speed=0;
         setVibration(speed);
         progress=0;
@@ -384,10 +394,7 @@ void loop() {
         #ifdef MODO_MOTOR
         digitalWrite(RELAY1,HIGH);        
         #endif
-
-        machine_state.setState(control::State::FLUSH);        
-        door_servo.write(DOOR_OPEN);      
-        setScreen(Screen::OPENDOOR);
+        machine_state.setState(control::State::SERVED);        
 
       }
       break;  
@@ -398,10 +405,10 @@ void loop() {
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
-      // door_button.update();             
-      // if (incomingChar=='F' || door_button.getState())
+      // cancel_button.update();             
+      // if (incomingChar=='F' || cancel_button.getState())
       // {        
-      //   door_button.reset();
+      //   cancel_button.reset();
       //   machine_state.setState(control::State::FLUSH);        
       //   door_servo.write(DOOR_OPEN);      
       //   setScreen(Screen::OPENDOOR); 
@@ -410,7 +417,7 @@ void loop() {
       break;
 
     case control::State::FLUSH:      
-      door_button.update();
+      cancel_button.update();
       read_weight = scale.get_units(SENSIBILIDAD_VACIADO);
       // Show weight as it falls down to 0
       // First erase bottom row
@@ -422,12 +429,12 @@ void loop() {
       lcd.print(" g");
       
       //For debug
-      //if (incomingChar=='R' || door_button.getState())
+      //if (incomingChar=='R' || cancel_button.getState())
       
-      // we leave door_button enabled in case door gets stuck open
-      if ((read_weight < 15) || door_button.getState())
+      // we leave cancel_button enabled in case door gets stuck open
+      if ((read_weight < 15) || cancel_button.getState())
       {        
-        door_button.reset();
+        cancel_button.reset();
         delay(door_delay);
         #ifdef MODO_MOTOR
         digitalWrite(RELAY1,LOW);

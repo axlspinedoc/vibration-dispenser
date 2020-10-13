@@ -54,15 +54,17 @@ Abra el archivo _utilities.h_ dentro de la carpeta _lib/inc_
 
 Desde aquí puede editarse:
 
-1. Velocidad 1 default
-2. Velocidad 2 default
-3. Nivel para cambio de velocidades default
-4. Peso inicial default
-5. Tiempo de espera cuando termina de vaciarse la Tolva
-6. Selección del modo del relevador
-7. Posiciones de la puerta en el estado ABIERTO y CERRADO
-8. Sensibilidad de la báscula durante dispensado y vaciado
-9. Calibración de báscula
+1. Producto a cargar al iniciar el equipo
+2. Peso inicial default
+3. Tiempo de espera cuando termina de vaciarse la Tolva
+4. Selección del modo del relevador
+5. Posiciones de la puerta en el estado ABIERTO y CERRADO
+6. Sensibilidad de la báscula durante dispensado y vaciado
+7. Calibración de báscula
+
+Para editar la base de datos de productos abra el archivo _productos.h_ dentro de la carpeta _lib/inc_
+
+Siga las indicaciones del archivo para agregar productos seleccionables desde la pantalla
 
 # ⛏️ Built Using <a name = "built_using"></a>
 
