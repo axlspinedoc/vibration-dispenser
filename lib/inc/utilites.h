@@ -1,4 +1,15 @@
 
+//------------------------------------------------------------------------------
+// @file: utilities.h
+// @author: Axel Sandoval
+// @e-mail: axel_isc@hotmail.com
+// @created on: September 15, 2020
+// 
+//
+// @brief: Configurations used for the operation of the equipment
+// LICENCE
+//------------------------------------------------------------------------------
+
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
@@ -24,7 +35,7 @@
 #define SENSIBILIDAD_VACIADO      4
 
 // Confuración de la báscula para transformar en gramos
-#define SCALE_GRAMS         206
+#define SCALE_GRAMS         216
 
 // Pinout definition
 #define KEYPAD_PIN          A0

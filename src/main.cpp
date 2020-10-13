@@ -17,6 +17,7 @@
 #include "../lib/scale/HX711.h"
 #include "../lib/io/screencom.h"
 #include "../lib/io/keypad.h"
+#include "../inc/productos.h"
 
 using namespace vibration_dispenser;
 
