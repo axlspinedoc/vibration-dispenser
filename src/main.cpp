@@ -766,11 +766,13 @@ int manageProduct(int saved_product){
             }else{
               set_product++;
             }
-            lcd.setCursor(0,1);            
+            lcd.setCursor(0,1);
+            lcd.print("                ");
+            lcd.setCursor(0,1);                        
             //TODO: Print current selection        
             //product_to_show.equals(product_id[%0]);
             
-            lcd.print(product_id);
+            lcd.print(set_product);
             
             break;
         case Key::DOWN:              
@@ -780,9 +782,11 @@ int manageProduct(int saved_product){
             }else{
               set_product--;
             }
-            lcd.setCursor(0,1);            
+            lcd.setCursor(0,1);
+            lcd.print("                ");
+            lcd.setCursor(0,1);                        
             //TODO: Print current selection
-            lcd.print(product_id);
+            lcd.print(set_product);
 
             break;
         default:        
