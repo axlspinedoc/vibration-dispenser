@@ -29,11 +29,11 @@ namespace vibration_dispenser{
 // Aquí definimos las características del dispensado
 int product_param[NUM_PRODUCTOS][3]{
     // Vel 1, Vel 2, % Cambio Vel
-    {  215,   115,    80},
-    {  215,   115,    80},
-    {  215,   115,    80},
-    {  215,   115,    80},
-    {  215,   115,    80}
+    {  210,   110,    80},
+    {  211,   111,    81},
+    {  212,   112,    82},
+    {  213,   113,    83},
+    {  214,   114,    84}
     
 };
 

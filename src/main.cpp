@@ -759,7 +759,8 @@ int manageProduct(int saved_product){
             }
             lcd.clear();
             //TODO: Print current selection        
-
+            //product_to_show.equals(product_id[%0]);
+            lcd.print(product_id);
             break;
         case Key::DOWN:              
             if (set_product==0)
@@ -770,7 +771,7 @@ int manageProduct(int saved_product){
             }
             lcd.clear();
             //TODO: Print current selection
-
+            lcd.print(product_id);
             break;
         default:        
             break;
