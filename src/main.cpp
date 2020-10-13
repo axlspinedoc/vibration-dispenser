@@ -752,7 +752,17 @@ void setProductScreen(){
 int manageProduct(int saved_product){
     
     int set_product=saved_product;
-    char product_to_show[16];    
+    char product_to_show[16];
+
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+    lcd.setCursor(0,1);                        
+                             
+    for (size_t i = 0; i < 16; i++)
+    {
+      product_to_show[i]=product_name[set_product][i];
+    }            
+    lcd.print(product_to_show);
   
     while (interface.getKey()!=Key::SELECT)
     {
