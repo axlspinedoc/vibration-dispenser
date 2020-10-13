@@ -56,6 +56,7 @@ int read_weight;
 int new_weight;
 int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
+int relay_delay=TIEMPO_DE_RELAY*1000;
 int delay_after_dispense=TIEMPO_DESPUES_DISP*1000;
 
 int new_first_speed;
@@ -401,7 +402,7 @@ void loop() {
 
     case control::State::SERVED:
         
-        // In case we arrive here by accident, jump to FLUSH        
+        // In case we arrive here, jump to FLUSH        
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
@@ -433,7 +434,7 @@ void loop() {
         
         #ifdef MODO_ALARMA
         digitalWrite(RELAY1,HIGH);
-        delay(TIEMPO_DE_RELAY);
+        delay(relay_delay);
         digitalWrite(RELAY1,LOW);
         #endif
         machine_state.setState(control::State::STANDBY);        
