@@ -56,6 +56,7 @@ int read_weight;
 int new_weight;
 int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
+int delay_after_dispense=TIEMPO_DESPUES_DISP*1000;
 
 int new_first_speed;
 int new_second_speed;
@@ -381,15 +382,14 @@ void loop() {
         cancel_button.reset();
         speed=0;
         setVibration(speed);
-        progress=0;
-        //machine_state.setState(control::State::SERVED);        
+        progress=0;        
         
         // Change: SERVED Screen now shows quantity dispensed
         setScreen(Screen::SERVED);
         Serial.println("State:= SERVED");
 
         // From here, we will delay 2s and jump right into FLUSH
-        delay(2000);        
+        delay(delay_after_dispense);        
 
         #ifdef MODO_MOTOR
         digitalWrite(RELAY1,HIGH);        
@@ -405,15 +405,6 @@ void loop() {
         machine_state.setState(control::State::FLUSH);        
         door_servo.write(DOOR_OPEN);      
         setScreen(Screen::OPENDOOR);
-      // cancel_button.update();             
-      // if (incomingChar=='F' || cancel_button.getState())
-      // {        
-      //   cancel_button.reset();
-      //   machine_state.setState(control::State::FLUSH);        
-      //   door_servo.write(DOOR_OPEN);      
-      //   setScreen(Screen::OPENDOOR); 
-      //   Serial.println("State:= FLUSH");
-      // }
       break;
 
     case control::State::FLUSH:      
@@ -442,7 +433,7 @@ void loop() {
         
         #ifdef MODO_ALARMA
         digitalWrite(RELAY1,HIGH);
-        delay(1000);
+        delay(TIEMPO_DE_RELAY);
         digitalWrite(RELAY1,LOW);
         #endif
         machine_state.setState(control::State::STANDBY);        

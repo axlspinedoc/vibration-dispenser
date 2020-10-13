@@ -61,6 +61,8 @@ Desde aquí puede editarse:
 5. Posiciones de la puerta en el estado ABIERTO y CERRADO
 6. Sensibilidad de la báscula durante dispensado y vaciado
 7. Calibración de báscula
+8. Tiempo de señal de _Relay_
+9. Tiempo de espera después de dispensar en tolva
 
 Para editar la base de datos de productos abra el archivo _productos.h_ dentro de la carpeta _lib/inc_
 
