@@ -40,6 +40,7 @@ enum class Screen{
     SETSPEED1,
     SETSPEED2,
     SETSPEEDCHANGE,
+    SETPRODUCT,
     DISPENSING,
     SERVED,
     OPENDOOR,
@@ -64,6 +65,8 @@ int new_speed_change_percentage;
 int speed_change_percentage=CAMBIO_VELOCIDAD;
 int speed;
 int menu=0;
+int product_id=0;
+int new_product_id=0;
 
 // TODO: Refactor inside screencom class
 // Forward definitions of Screencom
@@ -79,6 +82,7 @@ void changeConfirmedScreen();
 void errorScreen(String msg);
 int manageWeight(int saved_weight);
 int manageSpeed(int saved_speed);
+int manageProduct(int saved_product);
 void standbyMenus(int menu_num);
 
 // Forward definitions of vibrator
@@ -131,23 +135,14 @@ void loop() {
     switch (machine_state.getState())
     {
     case control::State::STANDBY:
-      disp_button.update();
-      
-      // if (incomingChar=='W' || interface.getKey()==Key::SELECT)
-      // {
-      //   interface.resetKeys();
-      //   machine_state.setState(control::State::SETGRAMS);
-      //   Serial.println("State:= SETGRAMS");
-      //   setScreen(Screen::SETWEIGHT,weight,weight);
-        
-      // }
+      disp_button.update();      
 
       //Menu scroller            
       switch (interface.getKey())
       {
       case Key::UP:
         interface.resetKeys();
-        if (menu==5)
+        if (menu==6)
         {
           menu=0;
           standbyMenus(menu);
@@ -161,7 +156,7 @@ void loop() {
         interface.resetKeys();
         if (menu==0)
         {
-          menu=5;
+          menu=6;
           standbyMenus(menu);
         }else{
           --menu;
@@ -202,6 +197,12 @@ void loop() {
             machine_state.setState(control::State::SETSPEEDCHANGE);
             Serial.println("State:= SETSPEEDCHANGE");
             setScreen(Screen::SETSPEED1,speed_change_percentage,speed_change_percentage);
+            break;
+          case 6:
+            interface.resetKeys();
+            machine_state.setState(control::State::SETPRODUCT);
+            Serial.println("State:= SETPRODUCT");
+            setScreen(Screen::SETPRODUCT);
             break;
           
           default:
@@ -297,6 +298,26 @@ void loop() {
           changeConfirmedScreen();
           Serial.println(speed_change_percentage);
       }
+      menu=0;
+      standbyMenus(menu);
+      machine_state.setState(control::State::STANDBY);
+      Serial.println("State:= STANDBY");
+      setScreen(Screen::STANDBY);
+      break;
+    
+    case control::State::SETPRODUCT:
+      
+      new_product_id=manageProduct(product_id);      
+      if (new_product_id!=product_id)
+      {
+          product_id=new_product_id;          
+          first_speed=product_param[product_id][0];
+          second_speed=product_param[product_id][1];
+          speed_change_percentage=product_param[product_id][2];          
+          changeConfirmedScreen();
+          Serial.println(product_id);
+      }
+      
       menu=0;
       standbyMenus(menu);
       machine_state.setState(control::State::STANDBY);
@@ -466,6 +487,9 @@ void setScreen(Screen menu, int old_value_, int new_value_){
   case Screen::SETWEIGHT:
     setWeightScreen(old_value_,new_value_);
     break;
+  case Screen::SETPRODUCT:
+    //openDoorScreen();
+    break;
   case Screen::DISPENSING:
     dispensingScreen();
     break;
@@ -475,6 +499,7 @@ void setScreen(Screen menu, int old_value_, int new_value_){
   case Screen::OPENDOOR:
     openDoorScreen();
     break;
+
   case Screen::ERRORSCREEN:
     //errorScreen();
     break;
@@ -714,6 +739,46 @@ int manageSpeed(int saved_speed){
     interface.resetKeys();
     return set_speed;       
 }
+// Manages product selection menu
+int manageProduct(int saved_product){
+    
+    int set_product=saved_product;
+    String product_to_show;    
+  
+    while (interface.getKey()!=Key::SELECT)
+    {
+        switch (interface.getKey())
+        {
+        
+        case Key::UP:              
+            if (set_product==NUM_PRODUCTOS)
+            {
+              set_product=0;
+            }else{
+              set_product++;
+            }
+            lcd.clear();
+            //TODO: Print current selection        
+
+            break;
+        case Key::DOWN:              
+            if (set_product==0)
+            {
+              set_product=NUM_PRODUCTOS;
+            }else{
+              set_product--;
+            }
+            lcd.clear();
+            //TODO: Print current selection
+
+            break;
+        default:        
+            break;
+            }    
+        }
+    interface.resetKeys();
+    return set_product;       
+}
 
 void changeConfirmedScreen(){
     lcd.clear();
@@ -761,6 +826,13 @@ void standbyMenus(int menu_num){
     lcd.print("Presione  SELECT");
     lcd.setCursor(0,1);
     lcd.print(" % p. cambio vel");
+    break;
+  
+  case 6:
+    //SETPRODUCT
+    lcd.print("Presione  SELECT");
+    lcd.setCursor(0,1);
+    lcd.print("Selec.  Producto");
     break;
   
   default:
