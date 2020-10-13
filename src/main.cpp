@@ -83,6 +83,7 @@ void errorScreen(String msg);
 int manageWeight(int saved_weight);
 int manageSpeed(int saved_speed);
 int manageProduct(int saved_product);
+void setProductScreen();
 void standbyMenus(int menu_num);
 
 // Forward definitions of vibrator
@@ -488,7 +489,7 @@ void setScreen(Screen menu, int old_value_, int new_value_){
     setWeightScreen(old_value_,new_value_);
     break;
   case Screen::SETPRODUCT:
-    //openDoorScreen();
+    setProductScreen();
     break;
   case Screen::DISPENSING:
     dispensingScreen();
@@ -627,6 +628,8 @@ void setSpeedScreen(int old_speed_, int new_speed_, int col){
   lcd.blink();
 }
 
+
+
 // Manages weight change screen. Allows user to change desired weight digit by
 // digit.
 int manageWeight(int saved_weight){
@@ -739,6 +742,12 @@ int manageSpeed(int saved_speed){
     interface.resetKeys();
     return set_speed;       
 }
+
+void setProductScreen(){
+  lcd.clear();
+  lcd.print("Selec. producto");
+}
+
 // Manages product selection menu
 int manageProduct(int saved_product){
     
@@ -757,10 +766,12 @@ int manageProduct(int saved_product){
             }else{
               set_product++;
             }
-            lcd.clear();
+            lcd.setCursor(0,1);            
             //TODO: Print current selection        
             //product_to_show.equals(product_id[%0]);
+            
             lcd.print(product_id);
+            
             break;
         case Key::DOWN:              
             if (set_product==0)
@@ -769,9 +780,10 @@ int manageProduct(int saved_product){
             }else{
               set_product--;
             }
-            lcd.clear();
+            lcd.setCursor(0,1);            
             //TODO: Print current selection
             lcd.print(product_id);
+
             break;
         default:        
             break;
