@@ -21,13 +21,12 @@
  * 
 */
 
-#include <string.h>
 #define NUM_PRODUCTOS 5
 
 namespace vibration_dispenser{
 
 // Aquí definimos las características del dispensado
-int product_param[NUM_PRODUCTOS][3]{
+const int product_param[NUM_PRODUCTOS][3]{
     // Vel 1, Vel 2, % Cambio Vel
     {  210,   110,    80},
     {  211,   111,    81},
@@ -38,7 +37,7 @@ int product_param[NUM_PRODUCTOS][3]{
 };
 
 // Aquí definimos nombre del producto, cuidando que no exceda los 16 caracteres
-String product_name[NUM_PRODUCTOS]{
+const char product_name[NUM_PRODUCTOS][16]{
     "Arandano",
     "Cacahuate",
     "Frijol",

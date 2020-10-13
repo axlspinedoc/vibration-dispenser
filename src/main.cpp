@@ -752,7 +752,7 @@ void setProductScreen(){
 int manageProduct(int saved_product){
     
     int set_product=saved_product;
-    String product_to_show;    
+    char product_to_show[16];    
   
     while (interface.getKey()!=Key::SELECT)
     {
@@ -761,7 +761,7 @@ int manageProduct(int saved_product){
         
         case Key::UP:              
             interface.resetKeys();
-            if (set_product==NUM_PRODUCTOS)
+            if (set_product==NUM_PRODUCTOS-1)
             {
               set_product=0;
             }else{
@@ -770,24 +770,31 @@ int manageProduct(int saved_product){
             lcd.setCursor(0,1);
             lcd.print("                ");
             lcd.setCursor(0,1);                        
-            //TODO: Print current selection                    
-            //product_to_show=product_id[set_product];
-            lcd.print(set_product);
+                             
+            for (size_t i = 0; i < 16; i++)
+            {
+              product_to_show[i]=product_name[set_product][i];
+            }            
+            lcd.print(product_to_show);
             
             break;
         case Key::DOWN:              
             interface.resetKeys();
             if (set_product==0)
             {
-              set_product=NUM_PRODUCTOS;
+              set_product=NUM_PRODUCTOS-1;
             }else{
               set_product--;
             }
             lcd.setCursor(0,1);
             lcd.print("                ");
             lcd.setCursor(0,1);                        
-            //TODO: Print current selection
-            lcd.print(set_product);
+            
+            for (size_t i = 0; i < 16; i++)
+            {
+              product_to_show[i]=product_name[set_product][i];
+            }            
+            lcd.print(product_to_show);
 
             break;
         default:        
