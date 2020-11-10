@@ -29,7 +29,7 @@
 
 // Controla la sensibilidad de la báscula
 // 1 = Lo más sensible      10 = Lo menos sensible
-#define SENSIBILIDAD_DISPENSADO   3
+#define SENSIBILIDAD_DISPENSADO   5
 #define SENSIBILIDAD_VACIADO      4
 
 // Confuración de la báscula para transformar en gramos
@@ -40,6 +40,9 @@
 
 // Tiempo a esperar justo después de dispensar en tolva
 #define TIEMPO_DESPUES_DISP       2
+
+// Tiempo de espera para evitar falsos positivos en las flechas
+#define PAUSA_FLECHAS             500
 
 // Pinout definition
 #define KEYPAD_PIN                A0

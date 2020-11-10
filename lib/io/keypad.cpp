@@ -65,7 +65,9 @@ Key Keypad::checkKeys(){
 }
 
 void Keypad::resetKeys(){
-    output_key_=Key::NO_KEY;    
+    output_key_=Key::NO_KEY;
+    // Added to avoid bouncing, root cause is wrong hardware modification
+    delay(PAUSA_FLECHAS);    
 }
   
 // END OF NAMESPACES -----------------------------------------------------------
