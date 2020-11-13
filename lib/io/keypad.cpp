@@ -40,23 +40,29 @@ namespace vibration_dispenser { namespace io {
     return output_key_;
 }
 
-Key Keypad::checkKeys(){
-    int reading=analogRead(keypad_pin_);
-    
-    if (reading<RIGHT_VALUE)
+// Utiliza valores a partir de 0.01 hasta 0.95
+//
+// AJUSTA AQUÍ LA SENSIBILIDAD DE LOS BOTONES PARA LAS FLECHAS -----¬
+//                                                                  |
+Key Keypad::checkKeys(){                                        //  |
+    int reading=analogRead(keypad_pin_);                        //  |
+    //                                                              |
+    //                                                              |
+    //                                                              v                                                                    
+    if (reading<RIGHT_VALUE && reading>(int)(RIGHT_VALUE*           0.8))
     {
         return Key::RIGHT;    
     } 
-    else if(reading<UP_VALUE){
+    else if(reading<UP_VALUE && reading>(int)(UP_VALUE*             0.8)){
         return Key::UP;
     }
-    else if(reading<DOWN_VALUE){
+    else if(reading<DOWN_VALUE && reading>(int)(DOWN_VALUE*         0.8)){
         return Key::DOWN;
     }
-    else if(reading<LEFT_VALUE){
+    else if(reading<LEFT_VALUE && reading>(int)(LEFT_VALUE*         0.8)){
         return Key::LEFT;
     }
-    else if (reading<SELECT_VALUE) {
+    else if (reading<SELECT_VALUE && reading>(int)(SELECT_VALUE*    0.8)) {
         return Key::SELECT;
     }
     else{
