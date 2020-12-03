@@ -44,19 +44,27 @@
 // Tiempo de espera para evitar falsos positivos en las flechas
 #define PAUSA_FLECHAS             500
 
+/*******************************************************************************
+
+TODO: CHECK PINOUTS!
+
+*******************************************************************************/
+
+
 // Pinout definition
-#define KEYPAD_PIN                A0
-#define CANCEL_BUTTON_PIN         29
-#define DISPENSE_BUTTON_PIN       37
+
+#define DC_CC_PIN
+#define DC_CCW_PIN
+
 #define SERVO_PIN                 3
 
-#define pin_RS                    8
-#define pin_EN                    9
-#define pin_d4                    4
-#define pin_d5                    5
-#define pin_d6                    6
-#define pin_d7                    7
-#define pin_BL                    10
+#define DISPENSE_BUTTON_PIN       27
+#define UP_BUTTON_PIN             29
+#define RIGHT_BUTTON_PIN          31
+#define DOWN_BUTTON_PIN           33
+#define LEFT_BUTTON_PIN           35
+#define ENTER_BUTTON_PIN          37
+#define CANCEL_BUTTON_PIN         39
 
 #define LOADCELL_DOUT_PIN         53
 #define LOADCELL_SCK_PIN          51
@@ -64,7 +72,6 @@
 // LCD definition 
 #define LCD_COL                   16
 #define LCD_ROW                   2
-
 
 // Keypad resistor values
 #define RIGHT_VALUE               60
