@@ -63,7 +63,7 @@
 
 // LCD definition 
 #define LCD_COL                   16
-#define LCD_ROW                   4
+#define LCD_ROW                   2
 
 
 // Keypad resistor values

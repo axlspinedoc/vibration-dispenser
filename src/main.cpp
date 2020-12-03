@@ -17,6 +17,7 @@
 #include "../lib/scale/HX711.h"
 #include "../lib/io/screencom.h"
 #include "../lib/io/keypad.h"
+#include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../inc/productos.h"
 
 using namespace vibration_dispenser;
@@ -24,6 +25,8 @@ using namespace vibration_dispenser;
 control::State_machine machine_state;
 io::Button cancel_button(CANCEL_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
+
+
 io::Keypad interface(KEYPAD_PIN);
 
 HX711 scale;
@@ -32,7 +35,10 @@ Servo door_servo;
 
 // TODO: Refactor inside screencom class
 // Screencom
-LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
+//LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
+
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
+
 enum class Screen{
     SPLASH=0,
     STANDBY,
@@ -111,7 +117,7 @@ void setup() {
   }
     
   // Screencom
-  lcd.begin(LCD_COL,LCD_ROW);
+  lcd.begin();
   setScreen(Screen::SPLASH);
   delay(500);
   machine_state.setState(control::State::STANDBY);
