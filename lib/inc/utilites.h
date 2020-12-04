@@ -16,8 +16,8 @@
 /**************************** INICIO DE CONFIGURACION *************************/
 
 #define PRODUCTO_INICIAL          0
-#define PESO_DEFAULT              1000
-#define TIEMPO_ESPERA             2       // Segundos después de vaciar tolva
+#define PESO_DEFAULT              500
+#define TIEMPO_ESPERA             1       // Segundos después de vaciar tolva
 
 // Actuador para puerta
 #define MODO_MOTOR
@@ -33,19 +33,24 @@
 #define VELOCIDAD_APERTURA        255
 #define VELOCIDAD_CIERRE          255
 
+// Tiempos para muestreo de la báscula
+#define FRECUENCIA_BASCULA        80
+
 // Controla la sensibilidad de la báscula
 // 1 = Lo más sensible      10 = Lo menos sensible
-#define SENSIBILIDAD_DISPENSADO   5
-#define SENSIBILIDAD_VACIADO      4
+#define SENSIBILIDAD_DISPENSADO   3
+#define SENSIBILIDAD_VACIADO      10
 
 // Confuración de la báscula para transformar en gramos
 #define SCALE_GRAMS               216
 
+// Frecuencia de chicharra
+#define FRECUENCIA_BUZZER         10
+
 // Tiempo de señal controlado por Relay en Segundos
 #define TIEMPO_DE_RELAY           2
-
 // Tiempo a esperar justo después de dispensar en tolva
-#define TIEMPO_DESPUES_DISP       2
+#define TIEMPO_DESPUES_DISP       1
 
 // Tiempo de espera para evitar falsos positivos en las flechas
 #define PAUSA_FLECHAS             500

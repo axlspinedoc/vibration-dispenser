@@ -44,12 +44,16 @@ char incomingChar;
 
 // Process variables
 int weight=PESO_DEFAULT;
-int read_weight;
+int read_weight=0;
+int previous_read_weight=0;
+unsigned long previous_weight_timestamp=0;
 int new_weight;
 int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
 int relay_delay=TIEMPO_DE_RELAY*1000;
 int delay_after_dispense=TIEMPO_DESPUES_DISP*1000;
+unsigned long previous_buzzer_timestamp=0;
+bool buzzer_on = false;
 
 int new_first_speed;
 int new_second_speed;
@@ -62,7 +66,6 @@ int first_speed=product_param[product_id][0];
 int second_speed=product_param[product_id][1];
 int speed_change_percentage=product_param[product_id][2];
 
-// TODO: Refactor inside screencom class
 // Forward definitions of Screencom
 Key checkArrowButtons();
 void resetArrowButtons();
@@ -84,6 +87,11 @@ void standbyMenus(int menu_num);
 
 // Forward definitions of vibrator
 void setVibration(int percentage);
+
+// Forward definition for reading scale
+int readScale(unsigned long timestamp, int prev_value);
+// Forward definition for buzzer relay
+void buzzer(unsigned long timestamp);
 
 void setup() {
   
@@ -128,13 +136,12 @@ void setup() {
   pinMode(VIBRATOR_PIN, OUTPUT);
 
   // Relays
-  
-  
   pinMode(RELAY1_PIN,OUTPUT); // Vibrador para Tolva
   pinMode(RELAY2_PIN,OUTPUT); // Alarma
   pinMode(RELAY3_PIN,OUTPUT); // Chicharra
   pinMode(RELAY4_PIN,OUTPUT); // --Libre--
   
+  // Relay behavior is inverted
   digitalWrite(RELAY1_PIN,HIGH);
   digitalWrite(RELAY2_PIN,HIGH);
   digitalWrite(RELAY3_PIN,HIGH);
@@ -364,7 +371,8 @@ void loop() {
       if (scale.read() < 8000000)
       {        
         //Client reported scale was too sensible, averaging will help stabilize
-        read_weight = scale.get_units(SENSIBILIDAD_DISPENSADO);                                         
+        //read_weight = scale.get_units(SENSIBILIDAD_DISPENSADO);
+        read_weight = readScale(millis(), read_weight);
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
@@ -410,7 +418,7 @@ void loop() {
         // From here, we will delay 2s and jump right into FLUSH
         delay(delay_after_dispense);        
         
-        //digitalWrite(RELAY1_PIN,HIGH);        
+        digitalWrite(RELAY1_PIN,LOW);        
         
         machine_state.setState(control::State::SERVED);        
 
@@ -455,13 +463,13 @@ void loop() {
         delay(door_delay);
         
         
-        //digitalWrite(RELAY1_PIN,LOW);
+        digitalWrite(RELAY1_PIN,HIGH);
         
         
         // Relevador para ALARMA
-        // digitalWrite(RELAY2_PIN,HIGH);
-        // delay(relay_delay);
-        // digitalWrite(RELAY2_PIN,LOW);
+        digitalWrite(RELAY2_PIN,LOW);
+        delay(relay_delay);
+        digitalWrite(RELAY2_PIN,HIGH);
         
 
         machine_state.setState(control::State::STANDBY);        
@@ -487,7 +495,10 @@ void loop() {
         if (checkArrowButtons()==Key::SELECT)
         {
           incomingChar='.';
-          //digitalWrite(RELAY1_PIN,LOW);
+          digitalWrite(RELAY1_PIN,HIGH);
+          digitalWrite(RELAY2_PIN,HIGH);
+          digitalWrite(RELAY3_PIN,HIGH);
+          digitalWrite(RELAY4_PIN,HIGH);
           resetArrowButtons();
           machine_state.setState(control::State::STANDBY);
           setScreen(Screen::STANDBY);
@@ -499,6 +510,33 @@ void loop() {
 }
 
 //---------------------------------FUNCTIONS------------------------------------
+
+// Forward definition for reading scale
+int readScale(unsigned long timestamp, int prev_value){
+  int ret = 0;
+  if((timestamp - previous_weight_timestamp) > FRECUENCIA_BASCULA){
+    ret = scale.get_units(SENSIBILIDAD_DISPENSADO);
+    previous_weight_timestamp=millis();
+  }else{
+    ret = prev_value;
+  }
+  return ret;
+}
+// Forward definition for buzzer relay
+void buzzer(unsigned long timestamp, bool buzzer_state){
+  if ((timestamp - previous_buzzer_timestamp) > FRECUENCIA_BUZZER)
+  {
+    if (buzzer_state==true)
+    {
+      digitalWrite(RELAY3_PIN, HIGH);
+    }else
+    {
+      digitalWrite(RELAY3_PIN, LOW);
+    }
+    previous_buzzer_timestamp=millis();    
+  }
+  
+}
 
 Key checkArrowButtons(){
   
@@ -584,14 +622,14 @@ void splashScreen(){
   lcd.setCursor(0,0);  
   lcd.print("Sistema iniciado");
   lcd.setCursor(11,1);
-  lcd.print("V1.0");
-  delay(500);
+  lcd.print("V2.0");
+  delay(250);
   lcd.clear();    
   lcd.setCursor(0,0);  
   lcd.print("|-----IDEA-----|");
   lcd.setCursor(0,1);
   lcd.print("|              |");
-  delay(2000);
+  delay(1000);
 
 }
 void standbyScreen(){  
