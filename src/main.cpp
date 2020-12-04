@@ -50,10 +50,13 @@ unsigned long previous_weight_timestamp=0;
 int new_weight;
 int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
-int relay_delay=TIEMPO_DE_RELAY*1000;
+uint16_t relay_delay=TIEMPO_DE_RELAY*1000;
 int delay_after_dispense=TIEMPO_DESPUES_DISP*1000;
 unsigned long previous_buzzer_timestamp=0;
 bool buzzer_on = false;
+int served_weight=0;
+bool wrong_weight = false;
+unsigned long timer_alarma=0;
 
 int new_first_speed;
 int new_second_speed;
@@ -73,7 +76,7 @@ void setScreen(Screen menu, int old_weight_=0, int new_weight_=0);
 void splashScreen();
 void standbyScreen();
 void dispensingScreen();
-void servedScreen();
+void servedScreen(int servido);
 void openDoorScreen();
 void setWeightScreen(int old_weight_, int new_weight_, int col = 14);
 void setSpeedScreen(int old_value_,int new_value_, int col = 14);
@@ -369,9 +372,7 @@ void loop() {
       setVibration(speed);
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
-      {        
-        //Client reported scale was too sensible, averaging will help stabilize
-        //read_weight = scale.get_units(SENSIBILIDAD_DISPENSADO);
+      {                
         read_weight = readScale(millis(), read_weight);
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
@@ -410,16 +411,27 @@ void loop() {
         speed=0;
         setVibration(speed);
         progress=0;        
-        
+                
+        delay(500);
         // Change: SERVED Screen now shows quantity dispensed
-        setScreen(Screen::SERVED);
+        served_weight = scale.get_units(SENSIBILIDAD_VACIADO);
+        setScreen(Screen::SERVED, served_weight);
+        if ((served_weight-ERROR_PERMISIBLE)>weight || (served_weight+ERROR_PERMISIBLE) < weight)
+        {
+          wrong_weight=true;
+          Serial.println("Wrong weight");
+        }else
+        {
+          wrong_weight=false;
+          Serial.println("Correct weight");
+        }        
+        
         Serial.println("State:= SERVED");
-
+        
         // From here, we will delay 2s and jump right into FLUSH
-        delay(delay_after_dispense);        
-        
-        digitalWrite(RELAY1_PIN,LOW);        
-        
+        delay(delay_after_dispense);                
+        digitalWrite(RELAY1_PIN,LOW);
+                        
         machine_state.setState(control::State::SERVED);        
 
       }
@@ -443,7 +455,8 @@ void loop() {
 
     case control::State::FLUSH:      
       cancel_button.update();
-      read_weight = scale.get_units(SENSIBILIDAD_VACIADO);
+      read_weight = readScale(millis(), read_weight);      
+      
       // Show weight as it falls down to 0
       // First erase bottom row
       lcd.setCursor(0,1);
@@ -453,26 +466,27 @@ void loop() {
       lcd.print(read_weight);
       lcd.print(" g");
       
-      //For debug
-      //if (incomingChar=='R' || cancel_button.getState())
-      
       // we leave cancel_button enabled in case door gets stuck open
       if ((read_weight < 15) || cancel_button.getState())
       {        
         cancel_button.reset();
         delay(door_delay);
+        digitalWrite(RELAY1_PIN,HIGH);                
+                                
+        timer_alarma=millis();
         
-        
-        digitalWrite(RELAY1_PIN,HIGH);
-        
-        
-        // Relevador para ALARMA
         digitalWrite(RELAY2_PIN,LOW);
-        delay(relay_delay);
-        digitalWrite(RELAY2_PIN,HIGH);
         
-
-        machine_state.setState(control::State::STANDBY);        
+        while((millis()-timer_alarma)>relay_delay){
+          // Relevador para ALARMA
+          if (wrong_weight==true)
+          {
+            buzzer(millis());          
+          }                              
+        }
+        digitalWrite(RELAY2_PIN,HIGH);
+        // erase flag
+        wrong_weight=false;
         
         #ifdef MODO_SERVO
         door_servo.write(DOOR_CLOSED);
@@ -483,6 +497,7 @@ void loop() {
         analogWrite(DC_CW_PIN,0);
         #endif
         
+        machine_state.setState(control::State::STANDBY);        
         setScreen(Screen::STANDBY);
         Serial.println("State:= STANDBY");
         menu=0;
@@ -523,15 +538,17 @@ int readScale(unsigned long timestamp, int prev_value){
   return ret;
 }
 // Forward definition for buzzer relay
-void buzzer(unsigned long timestamp, bool buzzer_state){
+void buzzer(unsigned long timestamp){
   if ((timestamp - previous_buzzer_timestamp) > FRECUENCIA_BUZZER)
   {
-    if (buzzer_state==true)
+    if (buzzer_on==true)
     {
       digitalWrite(RELAY3_PIN, HIGH);
+      buzzer_on = false;
     }else
     {
       digitalWrite(RELAY3_PIN, LOW);
+      buzzer_on = true;
     }
     previous_buzzer_timestamp=millis();    
   }
@@ -602,7 +619,7 @@ void setScreen(Screen menu, int old_value_, int new_value_){
     dispensingScreen();
     break;
   case Screen::SERVED:
-    servedScreen();
+    servedScreen(old_value_);
     break;
   case Screen::OPENDOOR:
     openDoorScreen();
@@ -645,14 +662,14 @@ void dispensingScreen(){
   lcd.clear();
   lcd.print("Dispensando...");
 }
-void servedScreen(){
+void servedScreen(int servido){
   lcd.clear();
   lcd.print("   Dispensado   ");   
   // screen mockup:
   // |   Dispensado   |
   // |     1000 g     |
   lcd.setCursor(4,1);
-  lcd.print(scale.get_units(SENSIBILIDAD_VACIADO));
+  lcd.print(servido);
   lcd.print(" g");
 }
 void openDoorScreen(){
