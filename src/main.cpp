@@ -39,24 +39,10 @@ Servo door_servo;
 
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
-enum class Screen{
-    SPLASH=0,
-    STANDBY,
-    TARE,
-    SETSPEED1,
-    SETSPEED2,
-    SETSPEEDCHANGE,
-    SETPRODUCT,
-    DISPENSING,
-    SERVED,
-    OPENDOOR,
-    SETWEIGHT,
-    ERRORSCREEN
-};
-
-// TODO: Refactor inside Serial_Debug class
 // Serial comm DEBUGGING
 char incomingChar;
+
+// Process variables
 int weight=PESO_DEFAULT;
 int read_weight;
 int new_weight;
@@ -108,6 +94,16 @@ void setup() {
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
   #endif
+  
+  #ifdef MODO_MOTOR
+  pinMode(DC_CCW_PIN,OUTPUT);
+  pinMode(DC_CW_PIN,OUTPUT);
+  #endif
+
+  #ifdef MODO_MOTOR
+  analogWrite(DC_CCW_PIN,VELOCIDAD_CIERRE);
+  analogWrite(DC_CW_PIN,0);
+  #endif
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
   
@@ -132,7 +128,16 @@ void setup() {
   pinMode(VIBRATOR_PIN, OUTPUT);
 
   // Relays
-  pinMode(RELAY1_PIN,OUTPUT);
+  pinMode(RELAY1_PIN,OUTPUT); // Vibrador para Tolva
+  pinMode(RELAY2_PIN,OUTPUT); // Alarma
+  pinMode(RELAY3_PIN,OUTPUT); // Chicharra
+  pinMode(RELAY4_PIN,OUTPUT); // --Libre--
+
+  digitalWrite(RELAY1_PIN,LOW);
+  digitalWrite(RELAY2_PIN,LOW);
+  digitalWrite(RELAY3_PIN,LOW);
+  digitalWrite(RELAY4_PIN,LOW);
+
 }
 
 void loop() {
@@ -402,10 +407,9 @@ void loop() {
 
         // From here, we will delay 2s and jump right into FLUSH
         delay(delay_after_dispense);        
-
-        #ifdef MODO_MOTOR
+        
         digitalWrite(RELAY1_PIN,HIGH);        
-        #endif
+        
         machine_state.setState(control::State::SERVED);        
 
       }
@@ -418,6 +422,12 @@ void loop() {
         #ifdef MODO_SERVO
         door_servo.write(DOOR_OPEN);      
         #endif
+
+        #ifdef MODO_MOTOR
+        analogWrite(DC_CCW_PIN,0);
+        analogWrite(DC_CW_PIN,VELOCIDAD_APERTURA);
+        #endif
+
         setScreen(Screen::OPENDOOR);
       break;
 
@@ -441,19 +451,26 @@ void loop() {
       {        
         cancel_button.reset();
         delay(door_delay);
-        #ifdef MODO_MOTOR
-        digitalWrite(RELAY1_PIN,LOW);
-        #endif
         
-        #ifdef MODO_ALARMA
-        digitalWrite(RELAY1_PIN,HIGH);
-        delay(relay_delay);
+        
         digitalWrite(RELAY1_PIN,LOW);
-        #endif
+        
+        
+        // Relevador para ALARMA
+        digitalWrite(RELAY2_PIN,HIGH);
+        delay(relay_delay);
+        digitalWrite(RELAY2_PIN,LOW);
+        
+
         machine_state.setState(control::State::STANDBY);        
         
         #ifdef MODO_SERVO
         door_servo.write(DOOR_CLOSED);
+        #endif
+
+        #ifdef MODO_MOTOR
+        analogWrite(DC_CCW_PIN,VELOCIDAD_CIERRE);
+        analogWrite(DC_CW_PIN,0);
         #endif
         
         setScreen(Screen::STANDBY);
