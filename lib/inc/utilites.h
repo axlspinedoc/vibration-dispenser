@@ -45,7 +45,8 @@
 #define SCALE_GRAMS               216
 
 // Frecuencia de chicharra
-#define FRECUENCIA_BUZZER         10
+#define FRECUENCIA_FALLA         10
+#define FRECUENCIA_PASA          20
 
 // Error de peso permisible
 #define ERROR_PERMISIBLE          30

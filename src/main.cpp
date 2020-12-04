@@ -94,7 +94,7 @@ void setVibration(int percentage);
 // Forward definition for reading scale
 int readScale(unsigned long timestamp, int prev_value);
 // Forward definition for buzzer relay
-void buzzer(unsigned long timestamp);
+void buzzer(unsigned long timestamp, unsigned long frecuencia);
 
 void setup() {
   
@@ -475,16 +475,27 @@ void loop() {
                                 
         timer_alarma=millis();
         
-        digitalWrite(RELAY2_PIN,LOW);
-        
-        while((millis()-timer_alarma)>relay_delay){
-          // Relevador para ALARMA
+        // Relevador para ALARMA
+        digitalWrite(RELAY2_PIN,LOW);        
+        while((millis()-timer_alarma)<relay_delay){
+          
           if (wrong_weight==true)
+          {            
+            // Buzzer para mal peso          
+            if ((millis()-timer_alarma)<relay_delay-800)            
+                buzzer(millis(), FRECUENCIA_FALLA);                                              
+          }
+          else
           {
-            buzzer(millis());          
-          }                              
+            // Buzzer para peso correcto
+            if ((millis()-timer_alarma)<relay_delay-1800)            
+              buzzer(millis(), FRECUENCIA_PASA);            
+          }
+                                        
         }
         digitalWrite(RELAY2_PIN,HIGH);
+        digitalWrite(RELAY3_PIN,HIGH);
+        buzzer_on=false;
         // erase flag
         wrong_weight=false;
         
@@ -538,8 +549,8 @@ int readScale(unsigned long timestamp, int prev_value){
   return ret;
 }
 // Forward definition for buzzer relay
-void buzzer(unsigned long timestamp){
-  if ((timestamp - previous_buzzer_timestamp) > FRECUENCIA_BUZZER)
+void buzzer(unsigned long timestamp, unsigned long frecuencia){
+  if ((timestamp - previous_buzzer_timestamp) > frecuencia)
   {
     if (buzzer_on==true)
     {
