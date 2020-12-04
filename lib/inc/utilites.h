@@ -71,10 +71,10 @@
 #define DC_CCW_PIN                5
 
 // Relay pinout
-#define RELAY1_PIN                14
-#define RELAY2_PIN                15
-#define RELAY3_PIN                16
-#define RELAY4_PIN                17
+#define RELAY4_PIN                14
+#define RELAY3_PIN                15
+#define RELAY2_PIN                16
+#define RELAY1_PIN                17
 
 // Button pinout
 #define DISPENSE_BUTTON_PIN       31

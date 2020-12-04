@@ -128,15 +128,17 @@ void setup() {
   pinMode(VIBRATOR_PIN, OUTPUT);
 
   // Relays
+  
+  
   pinMode(RELAY1_PIN,OUTPUT); // Vibrador para Tolva
   pinMode(RELAY2_PIN,OUTPUT); // Alarma
   pinMode(RELAY3_PIN,OUTPUT); // Chicharra
   pinMode(RELAY4_PIN,OUTPUT); // --Libre--
-
-  digitalWrite(RELAY1_PIN,LOW);
-  digitalWrite(RELAY2_PIN,LOW);
-  digitalWrite(RELAY3_PIN,LOW);
-  digitalWrite(RELAY4_PIN,LOW);
+  
+  digitalWrite(RELAY1_PIN,HIGH);
+  digitalWrite(RELAY2_PIN,HIGH);
+  digitalWrite(RELAY3_PIN,HIGH);
+  digitalWrite(RELAY4_PIN,HIGH);
 
 }
 
@@ -408,7 +410,7 @@ void loop() {
         // From here, we will delay 2s and jump right into FLUSH
         delay(delay_after_dispense);        
         
-        digitalWrite(RELAY1_PIN,HIGH);        
+        //digitalWrite(RELAY1_PIN,HIGH);        
         
         machine_state.setState(control::State::SERVED);        
 
@@ -453,13 +455,13 @@ void loop() {
         delay(door_delay);
         
         
-        digitalWrite(RELAY1_PIN,LOW);
+        //digitalWrite(RELAY1_PIN,LOW);
         
         
         // Relevador para ALARMA
-        digitalWrite(RELAY2_PIN,HIGH);
-        delay(relay_delay);
-        digitalWrite(RELAY2_PIN,LOW);
+        // digitalWrite(RELAY2_PIN,HIGH);
+        // delay(relay_delay);
+        // digitalWrite(RELAY2_PIN,LOW);
         
 
         machine_state.setState(control::State::STANDBY);        
@@ -485,7 +487,7 @@ void loop() {
         if (checkArrowButtons()==Key::SELECT)
         {
           incomingChar='.';
-          digitalWrite(RELAY1_PIN,LOW);
+          //digitalWrite(RELAY1_PIN,LOW);
           resetArrowButtons();
           machine_state.setState(control::State::STANDBY);
           setScreen(Screen::STANDBY);
