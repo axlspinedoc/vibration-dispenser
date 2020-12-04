@@ -18,6 +18,10 @@
 #define PESO_DEFAULT              1000
 #define TIEMPO_ESPERA             2       // Segundos después de vaciar tolva
 
+// Actuador para puerta
+#define MODO_MOTOR
+//#define MODO_SERVO
+
 // Para seleccionar el modo del relevador, remover las diagonales y 
 // colocarlas en el modo a desactivar
 #define MODO_ALARMA
@@ -53,21 +57,35 @@ TODO: CHECK PINOUTS!
 
 // Pinout definition
 
-#define DC_CC_PIN
-#define DC_CCW_PIN
+// Vibrator output pin
+#define VIBRATOR_PIN              2
 
-#define SERVO_PIN                 3
+#ifdef MODO_SERVO
+#define SERVO_PIN                 4
+#endif
+#ifdef MODO_MOTOR
+#define DC_CW_PIN                 4
+#endif
+#define DC_CCW_PIN                5
 
-#define DISPENSE_BUTTON_PIN       27
-#define UP_BUTTON_PIN             29
-#define RIGHT_BUTTON_PIN          31
-#define DOWN_BUTTON_PIN           33
-#define LEFT_BUTTON_PIN           35
-#define ENTER_BUTTON_PIN          37
-#define CANCEL_BUTTON_PIN         39
+#define RELAY1_PIN                14
+#define RELAY2_PIN                15
+#define RELAY3_PIN                16
+#define RELAY4_PIN                17
 
-#define LOADCELL_DOUT_PIN         53
-#define LOADCELL_SCK_PIN          51
+#define DISPENSE_BUTTON_PIN       31
+#define UP_BUTTON_PIN             33
+#define RIGHT_BUTTON_PIN          35
+#define DOWN_BUTTON_PIN           37
+#define LEFT_BUTTON_PIN           39
+#define ENTER_BUTTON_PIN          41
+#define CANCEL_BUTTON_PIN         43
+#define BUTTON8_PIN               45
+#define BUTTON9_PIN               47
+#define BUTTON10_PIN              49
+
+#define LOADCELL_DOUT_PIN         51
+#define LOADCELL_SCK_PIN          53
 
 // LCD definition 
 #define LCD_COL                   16
@@ -76,15 +94,9 @@ TODO: CHECK PINOUTS!
 // Keypad resistor values
 #define RIGHT_VALUE               60
 #define UP_VALUE                  200
-#define DOWN_VALUE             400
+#define DOWN_VALUE                400
 #define LEFT_VALUE                600
 #define SELECT_VALUE              800
-
-// Vibrator output pin
-#define VIBRATOR_PIN           2
-
-// Relays
-#define RELAY1                    46
 
 // namespace vibration_dispenser definition
 namespace vibration_dispenser{} 

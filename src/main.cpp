@@ -32,7 +32,10 @@ io::Button left_button(LEFT_BUTTON_PIN,100);
 io::Button enter_button(ENTER_BUTTON_PIN,100);
 
 HX711 scale;
+
+#ifdef MODO_SERVO
 Servo door_servo;
+#endif
 
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
@@ -100,8 +103,11 @@ void setup() {
   
   Serial.begin(115200);
   Serial.println("System initialized");
+  
+  #ifdef MODO_SERVO
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
+  #endif
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
   
@@ -126,7 +132,7 @@ void setup() {
   pinMode(VIBRATOR_PIN, OUTPUT);
 
   // Relays
-  pinMode(RELAY1,OUTPUT);
+  pinMode(RELAY1_PIN,OUTPUT);
 }
 
 void loop() {
@@ -398,7 +404,7 @@ void loop() {
         delay(delay_after_dispense);        
 
         #ifdef MODO_MOTOR
-        digitalWrite(RELAY1,HIGH);        
+        digitalWrite(RELAY1_PIN,HIGH);        
         #endif
         machine_state.setState(control::State::SERVED);        
 
@@ -409,7 +415,9 @@ void loop() {
         
         // In case we arrive here, jump to FLUSH        
         machine_state.setState(control::State::FLUSH);        
+        #ifdef MODO_SERVO
         door_servo.write(DOOR_OPEN);      
+        #endif
         setScreen(Screen::OPENDOOR);
       break;
 
@@ -434,16 +442,20 @@ void loop() {
         cancel_button.reset();
         delay(door_delay);
         #ifdef MODO_MOTOR
-        digitalWrite(RELAY1,LOW);
+        digitalWrite(RELAY1_PIN,LOW);
         #endif
         
         #ifdef MODO_ALARMA
-        digitalWrite(RELAY1,HIGH);
+        digitalWrite(RELAY1_PIN,HIGH);
         delay(relay_delay);
-        digitalWrite(RELAY1,LOW);
+        digitalWrite(RELAY1_PIN,LOW);
         #endif
         machine_state.setState(control::State::STANDBY);        
+        
+        #ifdef MODO_SERVO
         door_servo.write(DOOR_CLOSED);
+        #endif
+        
         setScreen(Screen::STANDBY);
         Serial.println("State:= STANDBY");
         menu=0;
@@ -456,7 +468,7 @@ void loop() {
         if (checkArrowButtons()==Key::SELECT)
         {
           incomingChar='.';
-          digitalWrite(RELAY1,LOW);
+          digitalWrite(RELAY1_PIN,LOW);
           resetArrowButtons();
           machine_state.setState(control::State::STANDBY);
           setScreen(Screen::STANDBY);
