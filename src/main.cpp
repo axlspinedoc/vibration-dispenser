@@ -17,47 +17,46 @@
 #include "../lib/scale/HX711.h"
 #include "../lib/io/screencom.h"
 #include "../lib/io/keypad.h"
+#include "../lib/MHAdapter/LiquidCrystal_I2C.h"
 #include "../inc/productos.h"
 
 using namespace vibration_dispenser;
 
 control::State_machine machine_state;
-io::Button cancel_button(CANCEL_BUTTON_PIN,100);
 io::Button disp_button(DISPENSE_BUTTON_PIN,100);
-io::Keypad interface(KEYPAD_PIN);
+io::Button cancel_button(CANCEL_BUTTON_PIN,100);
+io::Button up_button(UP_BUTTON_PIN,100);
+io::Button right_button(RIGHT_BUTTON_PIN,100);
+io::Button down_button(DOWN_BUTTON_PIN,100);
+io::Button left_button(LEFT_BUTTON_PIN,100);
+io::Button enter_button(ENTER_BUTTON_PIN,100);
 
 HX711 scale;
+
+#ifdef MODO_SERVO
 Servo door_servo;
+#endif
 
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
-// TODO: Refactor inside screencom class
-// Screencom
-LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
-enum class Screen{
-    SPLASH=0,
-    STANDBY,
-    TARE,
-    SETSPEED1,
-    SETSPEED2,
-    SETSPEEDCHANGE,
-    SETPRODUCT,
-    DISPENSING,
-    SERVED,
-    OPENDOOR,
-    SETWEIGHT,
-    ERRORSCREEN
-};
-
-// TODO: Refactor inside Serial_Debug class
 // Serial comm DEBUGGING
 char incomingChar;
+
+// Process variables
 int weight=PESO_DEFAULT;
-int read_weight;
+int read_weight=0;
+int previous_read_weight=0;
+unsigned long previous_weight_timestamp=0;
 int new_weight;
 int progress=0;
 int door_delay=TIEMPO_ESPERA*1000;
-int relay_delay=TIEMPO_DE_RELAY*1000;
+uint16_t relay_delay=TIEMPO_DE_RELAY*1000;
 int delay_after_dispense=TIEMPO_DESPUES_DISP*1000;
+unsigned long previous_buzzer_timestamp=0;
+bool buzzer_on = false;
+int served_weight=0;
+bool wrong_weight = false;
+unsigned long timer_alarma=0;
 
 int new_first_speed;
 int new_second_speed;
@@ -70,13 +69,14 @@ int first_speed=product_param[product_id][0];
 int second_speed=product_param[product_id][1];
 int speed_change_percentage=product_param[product_id][2];
 
-// TODO: Refactor inside screencom class
 // Forward definitions of Screencom
+Key checkArrowButtons();
+void resetArrowButtons();
 void setScreen(Screen menu, int old_weight_=0, int new_weight_=0);
 void splashScreen();
 void standbyScreen();
 void dispensingScreen();
-void servedScreen();
+void servedScreen(int servido);
 void openDoorScreen();
 void setWeightScreen(int old_weight_, int new_weight_, int col = 14);
 void setSpeedScreen(int old_value_,int new_value_, int col = 14);
@@ -91,12 +91,30 @@ void standbyMenus(int menu_num);
 // Forward definitions of vibrator
 void setVibration(int percentage);
 
+// Forward definition for reading scale
+int readScale(unsigned long timestamp, int prev_value);
+// Forward definition for buzzer relay
+void buzzer(unsigned long timestamp, unsigned long frecuencia);
+
 void setup() {
   
   Serial.begin(115200);
   Serial.println("System initialized");
+  
+  #ifdef MODO_SERVO
   door_servo.attach(SERVO_PIN);
   door_servo.write(DOOR_CLOSED);
+  #endif
+  
+  #ifdef MODO_MOTOR
+  pinMode(DC_CCW_PIN,OUTPUT);
+  pinMode(DC_CW_PIN,OUTPUT);
+  #endif
+
+  #ifdef MODO_MOTOR
+  analogWrite(DC_CCW_PIN,VELOCIDAD_CIERRE);
+  analogWrite(DC_CW_PIN,0);
+  #endif
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);  
   
@@ -111,7 +129,7 @@ void setup() {
   }
     
   // Screencom
-  lcd.begin(LCD_COL,LCD_ROW);
+  lcd.begin();
   setScreen(Screen::SPLASH);
   delay(500);
   machine_state.setState(control::State::STANDBY);
@@ -121,7 +139,17 @@ void setup() {
   pinMode(VIBRATOR_PIN, OUTPUT);
 
   // Relays
-  pinMode(RELAY1,OUTPUT);
+  pinMode(RELAY1_PIN,OUTPUT); // Vibrador para Tolva
+  pinMode(RELAY2_PIN,OUTPUT); // Alarma
+  pinMode(RELAY3_PIN,OUTPUT); // Chicharra
+  pinMode(RELAY4_PIN,OUTPUT); // --Libre--
+  
+  // Relay behavior is inverted
+  digitalWrite(RELAY1_PIN,HIGH);
+  digitalWrite(RELAY2_PIN,HIGH);
+  digitalWrite(RELAY3_PIN,HIGH);
+  digitalWrite(RELAY4_PIN,HIGH);
+
 }
 
 void loop() {
@@ -151,10 +179,10 @@ void loop() {
             
 
       //Menu scroller            
-      switch (interface.getKey())
+      switch (checkArrowButtons())
       {
       case Key::UP:
-        interface.resetKeys();
+        resetArrowButtons();
         if (menu==6)
         {
           menu=0;
@@ -166,7 +194,7 @@ void loop() {
         }                
         break;
       case Key::DOWN:
-        interface.resetKeys();
+        resetArrowButtons();
         if (menu==0)
         {
           menu=6;
@@ -183,36 +211,36 @@ void loop() {
           switch (menu)
           {
           case 1:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::TARE);
             Serial.println("State:= TARE");
             break;
           case 2:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::SETGRAMS);
             Serial.println("State:= SETGRAMS");
             setScreen(Screen::SETWEIGHT,weight,weight);
             break;
           case 3:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::SETSPEED1);
             Serial.println("State:= SETSPEED1");
             setScreen(Screen::SETSPEED1,first_speed,first_speed);
             break;
           case 4:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::SETSPEED2);
             Serial.println("State:= SETSPEED2");
             setScreen(Screen::SETSPEED1,second_speed,second_speed);
             break;
           case 5:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::SETSPEEDCHANGE);
             Serial.println("State:= SETSPEEDCHANGE");
             setScreen(Screen::SETSPEED1,speed_change_percentage,speed_change_percentage);
             break;
           case 6:
-            interface.resetKeys();
+            resetArrowButtons();
             machine_state.setState(control::State::SETPRODUCT);
             Serial.println("State:= SETPRODUCT");
             setScreen(Screen::SETPRODUCT);
@@ -344,9 +372,8 @@ void loop() {
       setVibration(speed);
       // TODO: Add "scale.is_ready() for protection and avoid hanging"
       if (scale.read() < 8000000)
-      {        
-        //Client reported scale was too sensible, averaging will help stabilize
-        read_weight = scale.get_units(SENSIBILIDAD_DISPENSADO);                                         
+      {                
+        read_weight = readScale(millis(), read_weight);
         progress= (int)(((float)read_weight/weight)*100);        
         Serial.print("progreso: ");
         Serial.println(progress);
@@ -384,17 +411,27 @@ void loop() {
         speed=0;
         setVibration(speed);
         progress=0;        
-        
+                
+        delay(500);
         // Change: SERVED Screen now shows quantity dispensed
-        setScreen(Screen::SERVED);
+        served_weight = scale.get_units(SENSIBILIDAD_VACIADO);
+        setScreen(Screen::SERVED, served_weight);
+        if ((served_weight-ERROR_PERMISIBLE)>weight || (served_weight+ERROR_PERMISIBLE) < weight)
+        {
+          wrong_weight=true;
+          Serial.println("Wrong weight");
+        }else
+        {
+          wrong_weight=false;
+          Serial.println("Correct weight");
+        }        
+        
         Serial.println("State:= SERVED");
-
+        
         // From here, we will delay 2s and jump right into FLUSH
-        delay(delay_after_dispense);        
-
-        #ifdef MODO_MOTOR
-        digitalWrite(RELAY1,HIGH);        
-        #endif
+        delay(delay_after_dispense);                
+        digitalWrite(RELAY1_PIN,LOW);
+                        
         machine_state.setState(control::State::SERVED);        
 
       }
@@ -404,13 +441,22 @@ void loop() {
         
         // In case we arrive here, jump to FLUSH        
         machine_state.setState(control::State::FLUSH);        
+        #ifdef MODO_SERVO
         door_servo.write(DOOR_OPEN);      
+        #endif
+
+        #ifdef MODO_MOTOR
+        analogWrite(DC_CCW_PIN,0);
+        analogWrite(DC_CW_PIN,VELOCIDAD_APERTURA);
+        #endif
+
         setScreen(Screen::OPENDOOR);
       break;
 
     case control::State::FLUSH:      
       cancel_button.update();
-      read_weight = scale.get_units(SENSIBILIDAD_VACIADO);
+      read_weight = readScale(millis(), read_weight);      
+      
       // Show weight as it falls down to 0
       // First erase bottom row
       lcd.setCursor(0,1);
@@ -420,25 +466,49 @@ void loop() {
       lcd.print(read_weight);
       lcd.print(" g");
       
-      //For debug
-      //if (incomingChar=='R' || cancel_button.getState())
-      
       // we leave cancel_button enabled in case door gets stuck open
       if ((read_weight < 15) || cancel_button.getState())
       {        
         cancel_button.reset();
         delay(door_delay);
+        digitalWrite(RELAY1_PIN,HIGH);                
+                                
+        timer_alarma=millis();
+        
+        // Relevador para ALARMA
+        digitalWrite(RELAY2_PIN,LOW);        
+        while((millis()-timer_alarma)<relay_delay){
+          
+          if (wrong_weight==true)
+          {            
+            // Buzzer para mal peso          
+            if ((millis()-timer_alarma)<relay_delay-800)            
+                buzzer(millis(), FRECUENCIA_FALLA);                                              
+          }
+          else
+          {
+            // Buzzer para peso correcto
+            if ((millis()-timer_alarma)<relay_delay-1800)            
+              buzzer(millis(), FRECUENCIA_PASA);            
+          }
+                                        
+        }
+        digitalWrite(RELAY2_PIN,HIGH);
+        digitalWrite(RELAY3_PIN,HIGH);
+        buzzer_on=false;
+        // erase flag
+        wrong_weight=false;
+        
+        #ifdef MODO_SERVO
+        door_servo.write(DOOR_CLOSED);
+        #endif
+
         #ifdef MODO_MOTOR
-        digitalWrite(RELAY1,LOW);
+        analogWrite(DC_CCW_PIN,VELOCIDAD_CIERRE);
+        analogWrite(DC_CW_PIN,0);
         #endif
         
-        #ifdef MODO_ALARMA
-        digitalWrite(RELAY1,HIGH);
-        delay(relay_delay);
-        digitalWrite(RELAY1,LOW);
-        #endif
         machine_state.setState(control::State::STANDBY);        
-        door_servo.write(DOOR_CLOSED);
         setScreen(Screen::STANDBY);
         Serial.println("State:= STANDBY");
         menu=0;
@@ -448,11 +518,14 @@ void loop() {
 
     default: //Unknown State, shouldn't be reachable. Must prompt error.
         //machine_state.setState(control::State::ERROR);
-        if (interface.getKey()==Key::SELECT)
+        if (checkArrowButtons()==Key::SELECT)
         {
           incomingChar='.';
-          digitalWrite(RELAY1,LOW);
-          interface.resetKeys();
+          digitalWrite(RELAY1_PIN,HIGH);
+          digitalWrite(RELAY2_PIN,HIGH);
+          digitalWrite(RELAY3_PIN,HIGH);
+          digitalWrite(RELAY4_PIN,HIGH);
+          resetArrowButtons();
           machine_state.setState(control::State::STANDBY);
           setScreen(Screen::STANDBY);
           break;
@@ -464,6 +537,69 @@ void loop() {
 
 //---------------------------------FUNCTIONS------------------------------------
 
+// Forward definition for reading scale
+int readScale(unsigned long timestamp, int prev_value){
+  int ret = 0;
+  if((timestamp - previous_weight_timestamp) > FRECUENCIA_BASCULA){
+    ret = scale.get_units(SENSIBILIDAD_DISPENSADO);
+    previous_weight_timestamp=millis();
+  }else{
+    ret = prev_value;
+  }
+  return ret;
+}
+// Forward definition for buzzer relay
+void buzzer(unsigned long timestamp, unsigned long frecuencia){
+  if ((timestamp - previous_buzzer_timestamp) > frecuencia)
+  {
+    if (buzzer_on==true)
+    {
+      digitalWrite(RELAY3_PIN, HIGH);
+      buzzer_on = false;
+    }else
+    {
+      digitalWrite(RELAY3_PIN, LOW);
+      buzzer_on = true;
+    }
+    previous_buzzer_timestamp=millis();    
+  }
+  
+}
+
+Key checkArrowButtons(){
+  
+  up_button.update();
+  right_button.update();
+  left_button.update();
+  down_button.update();
+  enter_button.update();
+
+  if(up_button.getState()==true){
+    return Key::UP;
+  }
+  if(right_button.getState()==true){
+    return Key::RIGHT;
+  }
+  if(left_button.getState()==true){
+    return Key::LEFT;
+  }
+  if(down_button.getState()==true){
+    return Key::DOWN;
+  }
+  if(enter_button.getState()==true){
+    return Key::SELECT;
+  } 
+  return Key::NO_KEY;
+
+}
+
+void resetArrowButtons(){
+  up_button.reset();
+  right_button.reset();
+  left_button.reset();
+  down_button.reset();
+  enter_button.reset();
+}
 
 void setScreen(Screen menu, int old_value_, int new_value_){
   if (menu!=Screen::SETWEIGHT)
@@ -494,7 +630,7 @@ void setScreen(Screen menu, int old_value_, int new_value_){
     dispensingScreen();
     break;
   case Screen::SERVED:
-    servedScreen();
+    servedScreen(old_value_);
     break;
   case Screen::OPENDOOR:
     openDoorScreen();
@@ -514,14 +650,14 @@ void splashScreen(){
   lcd.setCursor(0,0);  
   lcd.print("Sistema iniciado");
   lcd.setCursor(11,1);
-  lcd.print("V1.0");
-  delay(500);
+  lcd.print("V2.0");
+  delay(250);
   lcd.clear();    
   lcd.setCursor(0,0);  
   lcd.print("|-----IDEA-----|");
   lcd.setCursor(0,1);
   lcd.print("|              |");
-  delay(2000);
+  delay(1000);
 
 }
 void standbyScreen(){  
@@ -537,14 +673,14 @@ void dispensingScreen(){
   lcd.clear();
   lcd.print("Dispensando...");
 }
-void servedScreen(){
+void servedScreen(int servido){
   lcd.clear();
   lcd.print("   Dispensado   ");   
   // screen mockup:
   // |   Dispensado   |
   // |     1000 g     |
   lcd.setCursor(4,1);
-  lcd.print(scale.get_units(SENSIBILIDAD_VACIADO));
+  lcd.print(servido);
   lcd.print(" g");
 }
 void openDoorScreen(){
@@ -637,12 +773,12 @@ int manageWeight(int saved_weight){
     int col=14;
     int increments[4] = {1,10,100,1000};    
     
-    while (interface.getKey()!=Key::SELECT)
+    while (checkArrowButtons()!=Key::SELECT)
     {
-        switch (interface.getKey())
+        switch (checkArrowButtons())
         {
         case Key::RIGHT:              
-            interface.resetKeys();                    
+            resetArrowButtons();                    
                 if (col<14)
                 {            
                     ++col;
@@ -650,7 +786,7 @@ int manageWeight(int saved_weight){
                 }        
             break;
         case Key::UP:              
-            interface.resetKeys();        
+            resetArrowButtons();        
             Serial.println("UP");
             set_weight += increments[14-col];
             if (set_weight>=2000)
@@ -660,7 +796,7 @@ int manageWeight(int saved_weight){
             setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::DOWN:              
-            interface.resetKeys();        
+            resetArrowButtons();        
             Serial.println("DOWN");
             set_weight -= increments[14-col];
             if (set_weight<=0)
@@ -670,7 +806,7 @@ int manageWeight(int saved_weight){
             setWeightScreen(saved_weight,set_weight,col);
             break;
         case Key::LEFT:        
-            interface.resetKeys();                            
+            resetArrowButtons();                            
                 if (col>11)
                 {            
                     --col;
@@ -682,7 +818,7 @@ int manageWeight(int saved_weight){
             break;
             }    
         }
-    interface.resetKeys();
+    resetArrowButtons();
     return set_weight;       
 }
 // Manages speed change screen. Allows user to change desired weight digit by
@@ -693,12 +829,12 @@ int manageSpeed(int saved_speed){
     int col=14;
     int increments[3] = {1,10,100};    
     
-    while (interface.getKey()!=Key::SELECT)
+    while (checkArrowButtons()!=Key::SELECT)
     {
-        switch (interface.getKey())
+        switch (checkArrowButtons())
         {
         case Key::RIGHT:              
-            interface.resetKeys();                    
+            resetArrowButtons();                    
                 if (col<14)
                 {            
                     ++col;
@@ -706,7 +842,7 @@ int manageSpeed(int saved_speed){
                 }        
             break;
         case Key::UP:              
-            interface.resetKeys();        
+            resetArrowButtons();        
             Serial.println("UP");
             set_speed += increments[14-col];
             if (set_speed>=255)
@@ -716,7 +852,7 @@ int manageSpeed(int saved_speed){
             setSpeedScreen(saved_speed,set_speed,col);
             break;
         case Key::DOWN:              
-            interface.resetKeys();        
+            resetArrowButtons();        
             Serial.println("DOWN");
             set_speed -= increments[14-col];
             if (set_speed<=0)
@@ -726,7 +862,7 @@ int manageSpeed(int saved_speed){
             setSpeedScreen(saved_speed,set_speed,col);
             break;
         case Key::LEFT:        
-            interface.resetKeys();                            
+            resetArrowButtons();                            
                 if (col>12)
                 {            
                     --col;
@@ -738,7 +874,7 @@ int manageSpeed(int saved_speed){
             break;
             }    
         }
-    interface.resetKeys();
+    resetArrowButtons();
     return set_speed;       
 }
 
@@ -763,13 +899,13 @@ int manageProduct(int saved_product){
     }            
     lcd.print(product_to_show);
   
-    while (interface.getKey()!=Key::SELECT)
+    while (checkArrowButtons()!=Key::SELECT)
     {
-        switch (interface.getKey())
+        switch (checkArrowButtons())
         {
         
         case Key::UP:              
-            interface.resetKeys();
+            resetArrowButtons();
             if (set_product==NUM_PRODUCTOS-1)
             {
               set_product=0;
@@ -788,7 +924,7 @@ int manageProduct(int saved_product){
             
             break;
         case Key::DOWN:              
-            interface.resetKeys();
+            resetArrowButtons();
             if (set_product==0)
             {
               set_product=NUM_PRODUCTOS-1;
@@ -810,7 +946,7 @@ int manageProduct(int saved_product){
             break;
             }    
         }
-    interface.resetKeys();
+    resetArrowButtons();
     return set_product;       
 }
 

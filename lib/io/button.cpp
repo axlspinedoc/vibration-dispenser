@@ -15,7 +15,7 @@ namespace vibration_dispenser { namespace io {
 // Sets pin for button in INPUT_PULLUP, adds debounce delay time in ms
 Button::Button(int pinout,unsigned long debounceDelay){
   button_pin_=pinout;
-  pinMode(pinout,INPUT_PULLUP);
+  pinMode(pinout,INPUT);
   debounceDelay_=debounceDelay;    
 }
   
