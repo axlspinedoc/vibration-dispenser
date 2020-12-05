@@ -16,7 +16,7 @@
 /**************************** INICIO DE CONFIGURACION *************************/
 
 #define PRODUCTO_INICIAL          0
-#define PESO_DEFAULT              150
+#define PESO_DEFAULT              500
 #define TIEMPO_ESPERA             1       // Segundos después de vaciar tolva
 
 // Actuador para puerta
